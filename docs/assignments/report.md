@@ -1,0 +1,129 @@
+# Portfolio Optimization with Multi-Objective Constraints
+
+## 1. Problem Statement (1/2 page)
+
+We aim to optimize a portfolio of assets to achieve high risk-adjusted returns while respecting certain constraints on leverage, drawdown, and volatility. Specifically, our project focuses on maximizing a combination of Sharpe Ratio and limiting maximum drawdown over a given historical period.
+
+### Why This Matters
+- Traditional mean-variance optimization oversimplifies risk using only variance.
+- Real-world portfolios must manage multiple risk dimensions (drawdown, volatility) and practical constraints (leverage, short selling).
+- By addressing these complexities, we can create a more realistic and robust portfolio strategy.
+
+### Success Metrics
+- **Primary**: Sharpe (or Sortino) Ratio improvement over baseline.
+- **Secondary**: Maximum Drawdown reduction, controlled volatility, stable returns across time.
+
+### Constraints
+- **Leverage**: May exceed 1 but within a specified maximum (e.g., 1.5–2.0).
+- **Short Selling**: Allowed up to a certain threshold.
+- **Drawdown**: Must remain below a specified percentage (e.g., 20% max drawdown).
+- **Data**: Historical daily/weekly returns for selected assets (10–30).
+
+### Data Requirements
+- Daily or weekly price data from a reliable source (CSV files or APIs like yfinance).
+- Sufficient history (e.g., 3–5 years) to handle training and validation.
+
+### Potential Pitfalls
+- Overfitting to historical data (backtest bias).
+- Incorrect handling of missing data or survivorship bias.
+- High computational costs if too many assets or constraints are added.
+
+---
+
+## 2. Technical Approach (1/2 page)
+
+### Mathematical Formulation
+Let \(w_i\) be the weight of asset \(i\). Our objective function can be expressed as:
+
+\[
+\text{Maximize } 
+  \alpha \cdot \frac{E[R_p]}{\sigma_p} 
+  + \beta \cdot \big(-\text{MaxDrawdown}(p)\big)
+\]
+subject to:
+\[
+\sum_i w_i = 1 \quad (\text{if no leverage}), 
+\quad \sum_i |w_i| \leq L_{\max} \quad (\text{if leverage is allowed}), 
+\quad w_i \geq -\delta \quad (\text{for short-selling up to }\delta).
+\]
+
+Where:
+- \(R_p = \sum_i w_i \cdot R_i\) is the portfolio return.
+- \(\sigma_p\) is the portfolio volatility.
+- \(\text{MaxDrawdown}(p)\) is the maximum observed drawdown.
+- \(\alpha, \beta\) are weighting factors to balance multiple objectives.
+
+### Algorithm & PyTorch Strategy
+- Represent weights \( \mathbf{w} \) as a PyTorch tensor.
+- Compute portfolio returns and risk measures (volatility, drawdown) within the computational graph.
+- Use gradient-based methods (e.g., Adam, LBFGS) to optimize \(-\text{objective}\) (because PyTorch minimizes by default).
+
+### Validation Methods
+- **In-Sample Optimization**: Train on a subset of historical data.
+- **Out-of-Sample Backtest**: Test on later data (walk-forward or simple split).
+- Compare results to a baseline (e.g., equal weights).
+
+### Resource Requirements
+- Python 3.8+, PyTorch, NumPy, pandas, matplotlib.
+- Sufficient CPU/GPU time for iterative optimization and backtesting.
+
+---
+
+## 3. Initial Results (1/2 page)
+
+### Evidence of Working Implementation
+- **Basic Test**: A small 5-asset dataset was loaded into our PyTorch pipeline. 
+- **No-Constraint Sharpe Optimization**: Initial run produced non-zero gradient updates, confirming weights are being optimized.
+
+### Performance Metrics (Preliminary)
+- **Initial Sharpe**: 1.05 on a small sample dataset.
+- **Drawdown**: ~25% peak-to-trough in the test sample.
+- The result suggests some improvement over naive equal-weight (Sharpe ~ 0.95).
+
+### Test Case Results
+- Verified the objective function calculates returns and volatility correctly.
+- Observed that adding a drawdown penalty can shift weights toward lower-volatility assets.
+
+### Current Limitations
+- Minimal data usage (only 6 months of daily returns).
+- No transaction cost modeling, which may impact real-world applicability.
+
+### Resource Usage Measurements
+- CPU-bound for small datasets; no GPU acceleration used yet.
+- Optimization completes in ~1 second for 5 assets but could scale up with more assets.
+
+### Unexpected Challenges
+- Handling negative weights for short selling in PyTorch required a custom clip function.
+- Integrating maximum drawdown in the computational graph introduced complexity in gradient calculation.
+
+---
+
+## 4. Next Steps (1/2 page)
+
+1. **Expand Data Universe**  
+   - Increase asset count (10–20), ensuring robust coverage of different sectors.
+   - Acquire a longer historical window (at least 3 years).
+
+2. **Refine Constraints**  
+   - Enforce leverage up to 1.5, short selling up to 30% of portfolio. 
+   - Evaluate how these constraints interact with drawdown penalty.
+
+3. **Rolling Optimization**  
+   - Implement a time-series approach to rebalance monthly/quarterly.
+
+4. **Transaction Costs**  
+   - Add a penalty for changing weights significantly between rebalances.
+
+5. **Advanced Validation**  
+   - Perform a walk-forward validation to reduce overfitting risk.
+   - Compare with multiple baselines (index funds, risk-parity strategy).
+
+**Key Questions:**
+- Should we incorporate robust optimization (uncertainty in expected returns)?
+- How can we integrate advanced risk measures like conditional value-at-risk?
+
+**What We’ve Learned So Far**  
+- Multi-objective optimization in finance can quickly become complex.
+- PyTorch’s auto-differentiation helps but requires careful handling of constraints.
+- Good data hygiene (cleaning, consistent date alignment) is critical.
+
