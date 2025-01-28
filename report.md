@@ -33,30 +33,28 @@ We aim to optimize a portfolio of assets to achieve high risk-adjusted returns w
 ## 2. Technical Approach
 
 ### Mathematical Formulation
-Let \(w_i\) be the weight of asset \(i\). Our objective function can be expressed as:
+Let $w_i$ be the weight of asset $i$. Our objective function can be expressed as:
 
-\[
-\text{Maximize } 
-  \alpha \cdot \frac{E[R_p]}{\sigma_p} 
-  + \beta \cdot \big(-\text{MaxDrawdown}(p)\big)
-\]
+$$
+\text{Maximize } \alpha \cdot \frac{E[R_p]}{\sigma_p} + \beta \cdot \big(-\text{MaxDrawdown}(p)\big)
+$$
 subject to:
-\[
+$$
 \sum_i w_i = 1 \quad (\text{if no leverage}), 
 \quad \sum_i |w_i| \leq L_{\max} \quad (\text{if leverage is allowed}), 
 \quad w_i \geq -\delta \quad (\text{for short-selling up to }\delta).
-\]
+$$
 
 Where:
-- \(R_p = \sum_i w_i \cdot R_i\) is the portfolio return.
-- \(\sigma_p\) is the portfolio volatility.
-- \(\text{MaxDrawdown}(p)\) is the maximum observed drawdown.
-- \(\alpha, \beta\) are weighting factors to balance multiple objectives.
+- $R_p = \sum_i w_i \cdot R_i$ is the portfolio return.
+- $\sigma_p$ is the portfolio volatility.
+- $\text{MaxDrawdown}(p)$ is the maximum observed drawdown.
+- $\alpha, \beta$ are weighting factors to balance multiple objectives.
 
 ### Algorithm & PyTorch Strategy
-- Represent weights \( \mathbf{w} \) as a PyTorch tensor.
+- Represent weights $\mathbf{w}$ as a PyTorch tensor.
 - Compute portfolio returns and risk measures (volatility, drawdown) within the computational graph.
-- Use gradient-based methods (e.g., Adam, LBFGS) to optimize \(-\text{objective}\) (because PyTorch minimizes by default).
+- Use gradient-based methods (e.g., Adam, LBFGS) to optimize $-\text{objective}$ (because PyTorch minimizes by default).
 
 ### Validation Methods
 - **In-Sample Optimization**: Train on a subset of historical data.
