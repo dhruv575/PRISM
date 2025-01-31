@@ -75,8 +75,10 @@ Where:
 ## 3. Initial Results
 
 ### Evidence of Working Implementation
-- **Basic Test**: A small 7-asset dataset was loaded into our PyTorch pipeline. 
-- **No-Constraint Sharpe Optimization**: Initial run produced non-zero gradient updates, confirming weights are being optimized.
+- **Basic Test**: A small 7-asset dataset was loaded into our PyTorch pipeline. \
+  Companies: Tesla, Google, Microsoft, Amazon, Apple, Meta, NVIDIA
+- **Online Gradient Descent** \
+Our initial run only considered the stock market in 2023 and produced weights that resulted in a portfolio that was only outperformed by a portfolio that only contained META and only continaed NVDA. Our fitness score was only slightly better than putting equal weights on all seven stocks.
 
 ### Performance Metrics (Preliminary)
 - **Initial Sharpe**: 1.05 on a small sample dataset.
