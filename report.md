@@ -38,23 +38,28 @@ Where: $R_p$ = Return of the portfolio | $R_f$ = Risk-free rate | $\sigma_p$ = S
 ## 2. Technical Approach
 
 ### Mathematical Formulation
-Let $w_i$ be the weight of asset $i$. Our objective function can be expressed as:
+Let $w_i$ denote the weight of asset $i$ in the portfolio. We define the portfolio return as 
+
+$$R_P = \sum_{i} w_i \cdot R_i$$
+
+The portfolio volatility $\sigma_p$ is computed as the annualized standard deviation of the daily portfolio returns, and the maximum drawdown of the portfolio, hereby abbreviated to $MDD(p)$, is computed from the cumulative returns. Given this, our objective function is
 
 $$
-\text{Maximize } \alpha \cdot \frac{E[R_p]}{\sigma_p} + \beta \cdot \big(-\text{MaxDrawdown}(p)\big)
-$$
-subject to:
-$$
-\sum_i w_i = 1 \quad (\text{if no leverage}), 
-\quad \sum_i |w_i| \leq L_{\max} \quad (\text{if leverage is allowed}), 
-\quad w_i \geq -\delta \quad (\text{for short-selling up to }\delta).
+\textbf{Maximize } \quad \alpha \cdot \frac{E[R_P] - R_f}{\sigma_p} + \beta \cdot \big(-MDD(p)\big) - \lambda \sum_i \left|w_i - w_i^{\text{prev}}\right|\,,
 $$
 
 Where:
-- $R_p = \sum_i w_i \cdot R_i$ is the portfolio return.
-- $\sigma_p$ is the portfolio volatility.
-- $\text{MaxDrawdown}(p)$ is the maximum observed drawdown.
-- $\alpha, \beta$ are weighting factors to balance multiple objectives.
+- $R_f$ is the risk-free rate, so that $\frac{E[R_p - R_f]}{\sigma_p}$ represents the Sharpe ratio.
+- $\alpha$ scales the impact of Sharpe ratio.
+- $\beta$ scales the impact of the drawdown term.
+- $\lambda$ is the transaction cost penalty, which penalizes large changes in portfolio weights between periods.
+- $w_i^{\text{prev}}$ denotes the weight of asset $i$ in the previous period.
+
+The portfolio weights are subject to the following constraints: 
+
+- If no leverage: $\sum_i w_i = 1 \quad \text{and} \quad w_i \geq 0 \quad \forall\, i\,.$ 
+- If allowing leverage: $\sum_i |w_i| \leq L_{\max}\,,$ where $L_{\max}$ is the maximum allowable leverage.
+- Short-selling limit: $w_i \geq -\delta \quad \forall\, i\,,$ where $\delta \geq 0$ specifies the maximum allowed short position per asset.
 
 ### Algorithm & PyTorch Strategy
 - Represent weights $\mathbf{w}$ as a PyTorch tensor.
