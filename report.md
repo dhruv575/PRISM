@@ -45,7 +45,7 @@ $$R_P = \sum_{i} w_i \cdot R_i$$
 The portfolio volatility $\sigma_p$ is computed as the annualized standard deviation of the daily portfolio returns, and the maximum drawdown of the portfolio, hereby abbreviated to $MDD(p)$, is computed from the cumulative returns. Given this, our objective function is
 
 $$
-\textbf{Maximize } \quad \alpha \cdot \frac{E[R_P] - R_f}{\sigma_p} + \beta \cdot \big(-MDD(p)\big) - \lambda \sum_i \left|w_i - w_i^{\text{prev}}\right|\,,
+\textbf{Maximize } \quad \alpha \cdot \frac{E[R_P] - R_f}{\sigma_p} + \beta \cdot \big(-MDD(p)\big) - \lambda \sum_i \left|w_i - w_i^{\text{prev}}\right|\,
 $$
 
 Where:
@@ -57,9 +57,9 @@ Where:
 
 The portfolio weights are subject to the following constraints: 
 
-- If no leverage: $\sum_i w_i = 1 \quad \text{and} \quad w_i \geq 0 \quad \forall\, i\,.$ 
-- If allowing leverage: $\sum_i |w_i| \leq L_{\max}\,,$ where $L_{\max}$ is the maximum allowable leverage.
-- Short-selling limit: $w_i \geq -\delta \quad \forall\, i\,,$ where $\delta \geq 0$ specifies the maximum allowed short position per asset.
+- If no leverage: $\sum_i w_i = 1 \quad \text{and} \quad w_i \geq 0 \quad \forall\ i\.$ 
+- If allowing leverage: $\sum_i |w_i| \leq L_{\max}\,$ where $L_{\max}$ is the maximum allowable leverage.
+- Short-selling limit: $w_i \geq -\delta \quad \forall\ i\$ where $\delta \geq 0$ specifies the maximum allowed short position per asset.
 
 ### Algorithm & PyTorch Strategy
 - Represent weights $\mathbf{w}$ as a PyTorch tensor.
