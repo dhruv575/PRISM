@@ -2,20 +2,25 @@
 
 ## 1. Problem Statement
 
-We aim to optimize a portfolio of assets to achieve high risk-adjusted returns while respecting certain constraints on leverage, drawdown, and volatility. Specifically, our project focuses on maximizing a combination of Sharpe Ratio and limiting maximum drawdown over a given historical period.
+Our goal is to optimize a daily portfolio of assets to achieve high risk-adjusted returns while respecting certain constraints on leverage, drawdown, and volatility. Specifically, our project focuses on maximizing a combination of financial risk metrics and ratios while limiting maximum drawdown over a given historical period.
 
 ### Why This Matters
-- Traditional mean-variance optimization oversimplifies risk using only variance.
-- Real-world portfolios must manage multiple risk dimensions (drawdown, volatility) and practical constraints (leverage, short selling).
-- By addressing these complexities, we can create a more realistic and robust portfolio strategy.
+- Traditional mean-variance optimization oversimplifies risk by only using variance.
+- Real-world portfolios must manage multiple risk dimensions (drawdown, volatility) and practical constraints (leverage, short selling) at the same time.
+- Variability in the real-world and extreme events (like COVID) don't follow a nice and familiar distribution, so due to their unprediciatbility, traditional trading strategies have different tolerance levels to these unexpected events.
+- By addressing these complexities, we aim to create a more realistic and robust decision-making strategy for creating a dynamic portfolio.
 
-### Success Metrics
-- **Primary**: Sharpe (or Sortino) Ratio improvement over baseline.
-- **Secondary**: Maximum Drawdown reduction, controlled volatility, stable returns across time.
+### Success Metric
+**Fitness Score** - What goes into the score
+- Ratio: Sharpe Ratio = $\frac{E[R_p - R_f]}{\sigma_p}$
+
+Where: $R_p$ = Return of the portfolio | $R_f$ = Risk-free rate | $\sigma_p$ = Standard deviation of the portfolio’s excess return (volatility)
+- Risk Metrics - Maximum Drawdown reduction, controlled volatility
+- Factor Exposure - this refers to the sensitivity of an investment, portfolio, or asset to specific risk factors or systematic drivers of returns
+- Portfolio Constraints - we ask the model to minimize transaction costs, minimize the change in our stock positions between days, and try to maintain stable returns over time
 
 ### Constraints
 - **Leverage**: May exceed 1 but within a specified maximum (e.g., 1.5–2.0).
-- **Short Selling**: Allowed up to a certain threshold.
 - **Drawdown**: Must remain below a specified percentage (e.g., 20% max drawdown).
 - **Data**: Historical daily/weekly returns for selected assets (10–30).
 
@@ -70,7 +75,7 @@ Where:
 ## 3. Initial Results
 
 ### Evidence of Working Implementation
-- **Basic Test**: A small 5-asset dataset was loaded into our PyTorch pipeline. 
+- **Basic Test**: A small 7-asset dataset was loaded into our PyTorch pipeline. 
 - **No-Constraint Sharpe Optimization**: Initial run produced non-zero gradient updates, confirming weights are being optimized.
 
 ### Performance Metrics (Preliminary)
@@ -105,20 +110,21 @@ Where:
 2. **Refine Constraints**  
    - Enforce leverage up to 1.5, short selling up to 30% of portfolio. 
    - Evaluate how these constraints interact with drawdown penalty.
+   - Integrate more advanced risk measures like conditional value-at-risk.
 
 3. **Rolling Optimization**  
-   - Implement a time-series approach to rebalance monthly/quarterly.
+   - Implement a time-series approach to rebalance daily/monthly/quarterly.
 
-4. **Transaction Costs**  
+4. **Short Selling**
+   - Allow the ability, up to a certain threshold, to bet against certain assets.
+     
+6. **Transaction Costs**  
    - Add a penalty for changing weights significantly between rebalances.
 
-5. **Advanced Validation**  
+7. **Advanced Validation**  
    - Perform a walk-forward validation to reduce overfitting risk.
    - Compare with multiple baselines (index funds, risk-parity strategy).
 
-**Key Questions:**
-- Should we incorporate robust optimization (uncertainty in expected returns)?
-- How can we integrate advanced risk measures like conditional value-at-risk?
 
 **What We’ve Learned So Far**  
 - Multi-objective optimization in finance can quickly become complex.
