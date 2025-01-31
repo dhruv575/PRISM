@@ -67,8 +67,8 @@ Where:
 - Compare results to a baseline (e.g., equal weights).
 
 ### Resource Requirements
-- Python 3.8+, PyTorch, NumPy, pandas, matplotlib.
-- Sufficient CPU/GPU time for iterative optimization and backtesting.
+- Python 3.8+, PyTorch, NumPy, pandas, matplotlib, yfinance.
+- Sufficient CPU/GPU time for iterative optimization and backtesting with large historical stock market prices.
 
 ---
 
@@ -104,7 +104,7 @@ Where:
 ## 4. Next Steps
 
 1. **Expand Data Universe**  
-   - Increase asset count (10–20), ensuring robust coverage of different sectors.
+   - Increase asset count (10–20 stocks), ensuring robust coverage of different sectors.
    - Acquire a longer historical window (at least 3 years).
 
 2. **Refine Constraints**  
