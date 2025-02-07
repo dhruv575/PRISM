@@ -4,9 +4,6 @@ theme: default
 paginate: true
 ---
 
-
----
-
 ## # Portfolio Optimization with Multi-Objective Constraints
 
 ---
@@ -55,9 +52,6 @@ Where: $R_p$ = Return of the portfolio | $R_f$ = Risk-free rate | $\sigma_p$ = S
 - High computational costs if too many assets or constraints are added.
 
 ---
-
----
-
 ## 2. Technical Approach
 
 ---
@@ -108,8 +102,6 @@ The portfolio weights are subject to the following constraints:
 
 ---
 
----
-
 ## 3. Initial Results
 
 ---
@@ -150,8 +142,6 @@ Our initial run only considered the stock market in 2023 and produced weights th
 ### Unexpected Challenges
 - Handling negative weights for short selling in PyTorch required a custom clip function.
 - Integrating maximum drawdown in the computational graph introduced complexity in gradient calculation.
-
----
 
 ---
 
