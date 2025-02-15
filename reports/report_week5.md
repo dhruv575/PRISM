@@ -86,22 +86,21 @@ The portfolio weights are subject to the following constraints:
 - **Online Gradient Descent** \
 Our testing only considers the stock market in 2022-2024 and produced weights that resulted in a portfolio that was only outperformed by a portfolio that only contained META and only continaed NVDA. With our updated fitness function using a working OGD algorithm, the score now outperforms all single investment stocks except for NVDA.
 
-### Performance Metrics (Preliminary)
-- **Initial Sharpe**: 1.05 on a small sample dataset.
-- **Drawdown**: ~25% peak-to-trough in the test sample.
-- The result suggests some improvement over naive equal-weight (Sharpe ~ 0.95).
+### Performance Metrics 
+- **Returns**: Cumulative returns performed by the OGD model is consistently returning around 1.5x, which is above all the singular stock investments except NVDA.
+- See the notebook for visuals.
 
 ### Test Case Results
 - Verified the objective function calculates returns and volatility correctly.
 - Observed that adding a drawdown penalty can shift weights toward lower-volatility assets.
 
 ### Current Limitations
-- Minimal data usage (only 6 months of daily returns).
-- No transaction cost modeling, which may impact real-world applicability.
+- Minimal data usage (only 24 months of daily returns).
+- An unclear transaction cost function is included in the model, which may not reflect real-world applicability.
 
 ### Resource Usage Measurements
 - CPU-bound for small datasets; no GPU acceleration used yet.
-- Optimization completes in ~1 second for 5 assets but could scale up with more assets.
+- Optimization completes in ~1 second for 7 assets but could scale up with more assets.
 
 ### Unexpected Challenges
 - Handling negative weights for short selling in PyTorch required a custom clip function.
@@ -112,13 +111,15 @@ Our testing only considers the stock market in 2022-2024 and produced weights th
 ## 4. Next Steps
 
 1. **Expand Data Universe**  
-   - Increase asset count (10–20 stocks), ensuring robust coverage of different sectors.
-   - Acquire a longer historical window (at least 3 years).
+   - Increase the number of assets considered in our portfolio to the complete S&P500. ensuring robust coverage of different sectors.
+   - Acquire a longer historical window and consider testing our model against time periods where there where sudden shocks to the market due to extreme events.
+     -  We will also consider the question: How long of historical window matters?
 
 2. **Refine Constraints**  
    - Enforce leverage up to 1.5, short selling up to 30% of portfolio. 
    - Evaluate how these constraints interact with drawdown penalty.
    - Integrate more advanced risk measures like conditional value-at-risk.
+     - Review the literature on alternative risk measures we should consider incorporating.
 
 3. **Rolling Optimization**  
    - Implement a time-series approach to rebalance daily/monthly/quarterly.
@@ -132,9 +133,19 @@ Our testing only considers the stock market in 2022-2024 and produced weights th
 7. **Advanced Validation**  
    - Perform a walk-forward validation to reduce overfitting risk.
    - Compare with multiple baselines (index funds, risk-parity strategy).
+   - Test our model with real-time data implementation
+
+8. **Other Methods to Consider**
+
+   We need to account for cases when the weights we put on our stocks are too sparse. There should be a mechancism to add a penalty for the sum of the weights $w_i$. We need more flexibility in our objective function to improve the way we account for the risk in the stock market.
+   - Online Multiplicative Weights
+     - Look into using multiplicative experts.
+   - Online Mirror Descent
+     - Think of stocks at the sector level. Then, the goal is to maximize entropy $\sum_i w_i \cdot \log(w_i)$. Look into the Bregman divergence.
 
 
 **What We’ve Learned So Far**  
 - Multi-objective optimization in finance can quickly become complex.
 - PyTorch’s auto-differentiation helps but requires careful handling of constraints.
 - Good data hygiene (cleaning, consistent date alignment) is critical.
+- We are influencing our portfolio with hindsight bias due to the fact that we chose the 7 firms that it can invest in. The choices we made depend on our knowledge of the past, so it is necessary to remove our influence on the model.
