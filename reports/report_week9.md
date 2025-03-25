@@ -202,7 +202,7 @@ We have applied three different queries across **EconLit**, **Scopus**, and **We
 | **Scopus**          | TITLE-ABS-KEY( "portfolio optimization" OR "asset allocation" ) AND ( "risk measures" OR "risk metrics" ) AND ( "drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR liquidity OR skewness OR kurtosis ) AND ( "stock" OR "equity" )                                                                                                         |
 | **EconLit**         | ("portfolio optimization" OR "portfolio selection") AND ( "risk measures" OR "risk metrics" OR "alternative risk premia" ) AND ( "drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR "tail risk" OR "drawdown range" OR "short selling" ) AND ( "liquidity" OR "factor-based" OR "multi-factor" OR "factor selection" OR "factor exposure" ) |
 
-The queries resulted in **192 articles** which we imported into Zotero for review. The final breakdown is:
+The queries resulted in **177 articles** which we imported into Zotero for review. The final breakdown is:
 
 | **Web of Science** | **Scopus** | **EconLit** |
 |--------------------|-----------:|------------:|
