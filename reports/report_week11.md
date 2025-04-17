@@ -1,121 +1,102 @@
 # Portfolio Refinement Through Iterative Sequential Modeling (PRISM)
 
-**Week 11 Update – Hyper‑Parameter Meta‑Optimization Layer**
-
----
-
 ## 1. Problem Statement
-Our objective remains to optimize a daily equity portfolio for superior **risk‑adjusted returns** while respecting constraints on drawdown, transaction costs, leverage, and sparsity. Week 11 adds an **outer gradient‑descent loop that _learns_ the optimizer’s own hyper‑parameters** (learning rate, decay, momentum, look‑back window). 
 
-### Why This Matters
-* Manual hyper‑parameter tuning is labor‑intensive and brittle; automating it lets the optimiser adapt to changing regimes.
-* Separately differentiating **drawdown** and **Sortino** gradients gives finer risk control than a single penalty term.
-* An expanded 110‑ticker universe delivers broader sector coverage without abandoning computational tractability.
+Our goal remains to optimize a daily portfolio of assets to achieve high risk-adjusted returns, managing constraints related to leverage, drawdown, and volatility. This week, we attempted to implement hyperparameter tuning specifically through gradient descent, although we were unable to successfully get it running.
 
-### Success Metric
-**Fitness Score** — unchanged composition, but now evaluated with _meta‑tuned_ hyper‑parameters:
-$$\text{Score}=\alpha_1\,\text{Sortino}-\alpha_2\,\text{Max DD}-\alpha_3\,\text{Turnover}-\alpha_4\,\text{L1 Sparsity}$$
+### Success Metric
+No change.
 
 ### Constraints
-* **Leverage** ≤ 1 (current runs are long‑only; leverage extension slated for Week 12).
-* **Max Drawdown** ≤ 20 %.
-* **Transaction Costs** ≤ 0.1 % per step.
-* **Sparsity** – target active positions ≈ 20–25.
+No change.
 
 ### Data Requirements
-* Daily adjusted closes from Yahoo Finance.
-* Training: 1 Jan 2022 → 31 Dec 2023.
-* Testing: 1 Jan 2024 → 17 Apr 2025.
+No change.
 
 ### Potential Pitfalls
-* Finite‑difference gradients for hyper‑params introduce noise.
-* Larger universe raises missing‑data risk.
+No change.
 
 ---
 
 ## 2. Technical Approach
 
 ### Mathematical Formulation
-The inner optimiser maximises:
-$$
-\max_{\mathbf w}\;\Big[\alpha_1\,\text{Sortino}(\mathbf w)-\alpha_2\,\text{MaxDD}(\mathbf w)-\alpha_3\,\|\mathbf w-\mathbf w^{\text{prev}}\|_1-\alpha_4\,\|\mathbf w\|_1\Big]
-$$
-with simplex projection (long‑only). Week 11 keeps $\alpha=(1,1,1,0.5,0.2)$ and introduces a **meta‑objective**:
-$$
-\max_{\theta\in\{\eta_0,\beta,\mu,\mathcal W\}}\;\text{CumReturn}_{\text{train}}\big(\mathrm{OGD}(\theta)\big)
-$$
-where $\theta$ are hyper‑parameters and OGD denotes the inner optimiser.
+No changes were made to the underlying mathematical formulation from Week 9.
 
-### Algorithm & PyTorch Strategy
-* **Inner Loop** – Online gradient descent with momentum and decaying step size.
-* **Outer Loop** – Five iterations of finite‑difference gradient ascent over $\theta$ (ε = 10⁻³).
-* **Diagnostics** – Per‑step logging of gradient norms, HHI, turnover; outer loop stores `history` for plotting.
+### Algorithm & PyTorch Strategy
+We attempted to extend our approach by implementing gradient descent to optimize hyperparameters dynamically. Specifically, we explored gradient updates for:
+- Learning rate adjustments.
+- Momentum parameters.
 
-### Validation Methods
-* **In‑Sample** – Optimise hyper‑params on 2022‑2023.
-* **Out‑of‑Sample** – Freeze best $\theta$ and evaluate 2024‑2025.
-* Baselines: equal‑weight and Week 9 fixed‑param OGD.
+However, due to implementation challenges, this approach was not successful in running effectively.
 
-### Resource Requirements
-Identical Python stack; runtime ≈ 12 s per outer‑loop iteration on CPU for 110 assets.
+### Validation Methods
+No change.
+
+### Resource Requirements
+No change.
 
 ---
 
 ## 3. Initial Results
 
 ### Evidence of Working Implementation
-* **Meta‑opt layer** closes in on $\eta_0≈0.05$, $\beta≈0.82$, $\mu≈0.70$, window≈45.
-* New plotting utility visualises score and hyper‑param paths.
+- **Hyperparameter Optimization**: Attempted implementation of hyperparameter gradient descent on:
+  - Learning rate (initially ranging between 0.005 and 0.01).
+  - Momentum (initially between 0.8 and 0.85).
 
 ### Performance Metrics
-| Metric | Week 9 Fixed‑Params | Week 11 Meta‑Tuned |
-|--------|-------------------:|-------------------:|
-| Train Cum. Return | baseline | **+7 pp** |
-| Test Cum. Return | baseline | **+4 pp** |
-| Max Drawdown (Test) | 24 % | **22 %** |
-| Avg. Turnover | 0.28 | **0.22** |
-| Active Positions > 0.5 % | 24 | **20** |
-| HHI | 1 480 | **1 360** |
+- **Implementation Issues**: Gradient descent on hyperparameters did not run successfully, preventing meaningful performance evaluation.
 
 ### Test Case Results
-Meta‑tuned portfolio maintains heavy NVDA/MSFT overweight but trims tail allocations, cutting turnover by ≈ 21 %.
+- Due to unsuccessful implementation, no concrete results were obtained from the gradient descent on hyperparameters.
 
 ### Current Limitations
-* Only 5 meta iterations – likely under‑explores space.
-* Drawdown gradient still heuristic; future work adds CVaR.
+- Difficulty in operationalizing gradient descent on hyperparameters.
+- Implementation hurdles need further troubleshooting and exploration.
 
 ### Resource Usage Measurements
-* Total run time (train + test) ≈ 1 m 10 s on 8‑core CPU.
+- No measurable increase due to unsuccessful implementation.
 
 ### Unexpected Challenges
-* Hyper‑param gradients occasionally explode when window < 25; clamped to ≥ 30.
+- Encountered significant technical barriers in setting up a stable gradient descent optimization for hyperparameters.
 
 ---
 
 ## 4. Intermediate Results
+We maintained the universe of 109 stocks and continued previous strategies. The gradient descent approach for hyperparameter tuning was explored but not successfully executed.
 
 ### Test Case Results
-Out‑of‑sample cumulative‑return curve lies above Week 9 throughout 2024–2025 except brief February‑2025 drawdown.
+- No significant updates due to implementation challenges with gradient descent on hyperparameters.
 
 ### Portfolio Concentration Analysis
-* **Active positions** 20–22.
-* **Top‑10 weight** ≈ 75 %.
-* **HHI** 1 360 indicates moderate concentration relative to Week 9.
+No changes; portfolio maintained based on previous implementations.
 
 ### Unexpected Challenges
-* Expanded universe magnifies missing‑data edge cases; dual forward/back fills mitigate.
+- Difficulty in implementing stable gradient descent optimization for hyperparameters required extensive troubleshooting, which did not yield a solution.
 
 ---
 
 ## 5. Next Steps
-1. **Risk Layer** – Add CVaR and Omega gradients; back‑test on 2008/2020.
-2. **Meta Loop** – Increase iterations; experiment with Adam/Adagrad in hyper‑param space.
-3. **Leverage & Shorting** – Activate gross leverage ≤ 1.5, per‑asset short cap ≤ 30 %.
-4. **Cross‑Asset Diversification** – Add ETF and Treasury buckets.
-5. **Codebase** – Separate core vs. meta modules; YAML config; unit tests.
+
+1. **Troubleshoot Gradient Descent Implementation**
+   - Further investigate and resolve technical issues preventing successful execution.
+
+2. **Alternative Hyperparameter Tuning Approaches**
+   - Explore alternative methods for adaptive hyperparameter tuning if gradient descent proves unfeasible.
+
+3. **Enhanced Validation Techniques**
+   - Continue evaluating alternative validation methods to effectively assess other adaptive hyperparameter tuning strategies.
+
+4. **Computational Efficiency Improvements**
+   - Optimize existing algorithms for computational efficiency to support future successful hyperparameter tuning implementations.
+
+5. **Robustness to Extreme Events**
+   - Continue assessing portfolio performance against extreme historical market events without dynamic hyperparameter adjustments for now.
 
 ---
 
-## Literature Review
-Refer to Week 9 bibliography for foundational multi‑objective optimisation works; CVaR and meta‑learning papers shortlisted for incorporation next sprint.
+# Literature Review
+
+No change from Week 9.
 
