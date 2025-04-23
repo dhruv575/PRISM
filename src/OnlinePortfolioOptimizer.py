@@ -292,8 +292,8 @@ class OnlinePortfolioOptimizer:
             ax.plot(self.loss_history[key][:i+1], label=key, color = f"C{idx}", marker = 'o')
             ax.set_title(f"{key.capitalize()} over Time")
             if key == "enp":
-                if self.loss_history[key][i] <= self.enp_max + 5:
-                    ax.set_ylim(0, self.enp_max + 5)
+                if self.loss_history[key][i] <= self.enp_max * 2:
+                    ax.set_ylim(0, self.enp_max * 2)
 
                 ax.axhline(self.enp_min, linestyle='--', color='gray', alpha=0.5, label="ENP Min")
                 ax.axhline(self.enp_max, linestyle='--', color='gray', alpha=0.5, label="ENP Max")
