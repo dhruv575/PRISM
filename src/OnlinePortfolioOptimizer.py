@@ -9,6 +9,8 @@ import numpy as np
 import seaborn as sns
 from tqdm import tqdm
 import statsmodels.api as sm
+from IPython.display import display, clear_output
+from matplotlib.animation import FFMpegWriter
 
 class OnlinePortfolioOptimizer:
     def __init__(
@@ -74,14 +76,14 @@ class OnlinePortfolioOptimizer:
             - self.alphas[3] * concentration
         )
 
-    def run(self):
-        print("Initializing optimization...")
+    def run(self, plot_live_results=True, save_path="optimization.mp4"):
+        self.fig = plt.figure(figsize=(20, 18))
+        self.loss_history = {k: [] for k in ["sortino", "mdd", "turnover", "enp"]}
         self.optimizer = torch.optim.SGD([self.weights], lr=self.lr)
 
-        for i, date in tqdm(enumerate(self.returns.index)):
-            # if i % 5 == 0:
-            #     print(f"Step {i} of {self.returns.shape[0]}", end="\r")
+        metadata = dict(title="Portfolio Optimization", artist="Matplotlib")
 
+        for i, date in enumerate(self.returns.index):
             with torch.no_grad():
                 self.weights += self.eps * torch.randn_like(self.weights)
 
@@ -90,7 +92,6 @@ class OnlinePortfolioOptimizer:
                 self.returns.loc[date].T[:-1], dtype=torch.float32
             )
             ret = torch.dot(normalized_weights, daily_returns)
-
             self.return_logs[i] = ret.detach()
             self.rolling_return_list.append(ret)
 
@@ -101,20 +102,95 @@ class OnlinePortfolioOptimizer:
                     self.rf.iloc[max(0, i - self.window_size):i].values,
                     dtype=torch.float32,
                 )
-                objective = -self.calculate_objective(
-                    past_returns,
-                    past_rf,
-                    normalized_weights,
-                    self.weights_log[i - 1],
+
+                sortino = self.calculate_sortino(past_returns, past_rf)
+                mdd = self.calculate_max_drawdown(past_returns)
+                turnover = self.calculate_turnover(normalized_weights, self.weights_log[i - 1])
+                concentration = self.concentration_penalty(normalized_weights)
+
+                # because i want to visualize ENP and not concentration
+                hhi = torch.sum(normalized_weights**2)
+                enp = 1.0/(hhi + self.eps)
+
+                self.loss_history["sortino"].append(sortino.item())
+                self.loss_history["mdd"].append(mdd.item())
+                self.loss_history["turnover"].append(turnover.item())
+                self.loss_history["enp"].append(enp.item())
+
+                total_objective = (
+                    self.alphas[0] * sortino
+                    - self.alphas[1] * mdd
+                    - self.alphas[2] * turnover
+                    - self.alphas[3] * concentration
                 )
+
+                objective = -total_objective
                 self.optimizer.zero_grad()
                 objective.backward(retain_graph=True)
                 self.optimizer.step()
+            else:
+                for k in self.loss_history:
+                    self.loss_history[k].append(np.nan)
 
             self.weights_log[i] = normalized_weights
 
-        print("Optimization completed.")
+            if plot_live_results and i % 5 == 0:
+                clear_output(wait=True)
+                self._update_live_plot(i)
+                display(self.fig)
+                self.fig.canvas.draw()
+
+        print(f"Optimization completed.")
         return self.return_logs, self.weights_log
+    
+
+    # def run(
+    #         self,
+    #         plot_live_results = False,
+    #         fig = None,
+    #         ax = None,
+    #     ):
+
+    #     print("Initializing optimization...")
+    #     self.optimizer = torch.optim.SGD([self.weights], lr=self.lr)
+
+    #     for i, date in tqdm(enumerate(self.returns.index)):
+    #         # if i % 5 == 0:
+    #         #     print(f"Step {i} of {self.returns.shape[0]}", end="\r")
+
+    #         # with torch.no_grad():
+    #         #     self.weights += self.eps * torch.randn_like(self.weights)
+
+    #         normalized_weights = torch.nn.functional.softmax(self.weights, dim=0)
+    #         daily_returns = torch.tensor(
+    #             self.returns.loc[date].T[:-1], dtype=torch.float32
+    #         )
+    #         ret = torch.dot(normalized_weights, daily_returns)
+
+    #         self.return_logs[i] = ret.detach()
+    #         self.rolling_return_list.append(ret)
+
+    #         if len(self.rolling_return_list) > self.window_size:
+    #             self.rolling_return_list.pop(0)
+    #             past_returns = torch.stack(self.rolling_return_list)
+    #             past_rf = torch.tensor(
+    #                 self.rf.iloc[max(0, i - self.window_size):i].values,
+    #                 dtype=torch.float32,
+    #             )
+    #             objective = -self.calculate_objective(
+    #                 past_returns,
+    #                 past_rf,
+    #                 normalized_weights,
+    #                 self.weights_log[i - 1],
+    #             )
+    #             self.optimizer.zero_grad()
+    #             objective.backward(retain_graph=True)
+    #             self.optimizer.step()
+
+    #         self.weights_log[i] = normalized_weights
+
+    #     print("Optimization completed.")
+    #     return self.return_logs, self.weights_log
 
 
     def compute_sharpe(self):
@@ -181,3 +257,100 @@ class OnlinePortfolioOptimizer:
         axes[1].set_title("Final Day Weight Distribution")
         plt.tight_layout()
         plt.show()
+
+    def _update_live_plot(self, i):
+        self.fig.clf()
+        gs = self.fig.add_gridspec(6, 2)
+
+        # Title + Hyperparams Text
+        ax_title = self.fig.add_subplot(gs[0, :])
+        ax_title.axis('off')
+        ax_title.set_title("Optimization Results", fontsize=25, weight='bold')
+        summary = (
+            f"Alphas: {self.alphas.tolist()} | "
+            f"Window Size: {self.window_size} | "
+            f"ENP Range: [{self.enp_min}, {self.enp_max}] | "
+            f"LR: {self.lr} | # Assets: {self.n_assets} | "
+            f"Date: {self.returns.index[i].strftime('%Y-%m-%d')}"
+        )
+        ax_title.text(0.5, 0.2, summary, ha='center', fontsize=20)
+
+        # Cumulative Return Comparison
+        ax_cumret = self.fig.add_subplot(gs[1, :])
+        cum_returns = (self.return_logs[:i+1].numpy() + 1).cumprod()
+        ax_cumret.plot(self.returns.index[:i+1], cum_returns, label="Optimized", color="red")
+        if "S&P500" in self.benchmark_returns:
+            spx = (self.benchmark_returns["S&P500"][:i+1] + 1).cumprod()
+            ax_cumret.plot(self.returns.index[:i+1], spx, label="S&P 500", color="C0")
+        ax_cumret.set_title("Cumulative Portfolio Value vs Benchmark")
+        ax_cumret.legend()
+
+        # Loss Components Grid (2x2)
+        keys = list(self.loss_history.keys())
+        for idx, key in enumerate(keys):
+            ax = self.fig.add_subplot(gs[2 + idx // 2, idx % 2])
+            ax.plot(self.loss_history[key][:i+1], label=key, color = f"C{idx}", marker = 'o')
+            ax.set_title(f"{key.capitalize()} over Time")
+            if key == "enp":
+                if self.loss_history[key][i] <= self.enp_max + 5:
+                    ax.set_ylim(0, self.enp_max + 5)
+
+                ax.axhline(self.enp_min, linestyle='--', color='gray', alpha=0.5, label="ENP Min")
+                ax.axhline(self.enp_max, linestyle='--', color='gray', alpha=0.5, label="ENP Max")
+                ax.legend()
+
+        # Weights Distribution (left)
+        ax_weights_dist = self.fig.add_subplot(gs[4, 0])
+        ax_weights_dist.hist(
+            self.weights_log[i].detach().numpy(), 
+            bins=50, 
+            color='orange', 
+            alpha=0.7,
+            log=(self.n_assets > 500)
+        )
+        ax_weights_dist.set_title("Weight Distribution")
+
+        # Weights Evolution (right)
+        ax_weights = self.fig.add_subplot(gs[4, 1])
+        weights_np = self.weights_log[:i+1].detach().numpy()
+        final_weights = weights_np[-1]
+        top_50 = np.argsort(final_weights)[-50:]
+        top_5 = top_50[-5:]
+        for idx in top_50:
+            label = self.returns.columns[idx] if idx in top_5 else None
+            lw = 2 if idx in top_5 else 0.5
+            ax_weights.plot(self.returns.index[:i+1], weights_np[:, idx], label=label, linewidth=lw)
+        if len(top_5) > 0:
+            ax_weights.legend(fontsize=6)
+        ax_weights.set_title("Weights Evolution (Top 50)")
+        ax_weights.set_xticklabels([])
+
+        # Return Distribution (bottom full-width)
+        ax_ret_dist = self.fig.add_subplot(gs[5, :])
+        rets = self.return_logs[:i+1].numpy()
+        rf_today = self.rf.iloc[i]
+        bins = 50
+        hist, bin_edges = np.histogram(rets, bins=bins)
+        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+        bar_colors = ['red' if center < rf_today else 'green' for center in bin_centers]
+
+        ax_ret_dist.bar(
+            bin_centers,
+            hist,
+            width=(bin_edges[1] - bin_edges[0]),
+            color=bar_colors,
+            edgecolor='black',
+            alpha=0.3
+        )
+
+        ax_ret_dist.axvline(
+            rf_today,
+            color='red',
+            linestyle='--',
+            label=f'RF Rate: {rf_today:.4f}'
+        )
+        ax_ret_dist.set_title("Return Distribution with Daily RF Threshold")
+        ax_ret_dist.legend()
+
+        plt.tight_layout()
