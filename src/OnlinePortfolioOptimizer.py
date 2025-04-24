@@ -84,6 +84,9 @@ class OnlinePortfolioOptimizer:
         metadata = dict(title="Portfolio Optimization", artist="Matplotlib")
 
         for i, date in enumerate(self.returns.index):
+            if not plot_live_results:
+                print(f"Processing {date} ({i} / {self.returns.shape[0]})")
+
             with torch.no_grad():
                 self.weights += self.eps * torch.randn_like(self.weights)
 
@@ -193,16 +196,22 @@ class OnlinePortfolioOptimizer:
     #     return self.return_logs, self.weights_log
 
 
-    def compute_sharpe(self):
+    def evaluate_sharpe(self):
         excess = self.return_logs.numpy() - self.rf.values
         return np.mean(excess) / (np.std(excess) + self.eps)
 
-    def compute_max_drawdown(self):
+    def evaluate_sortino(self):
+        excess = self.return_logs.numpy() - self.rf.values
+        downside_risk = np.std(excess[excess < 0])
+        mean_excess = np.mean(excess)
+        return mean_excess / downside_risk if downside_risk > 0 else 0.0
+
+    def evaluate_max_drawdown(self):
         cr = np.cumprod(self.return_logs.numpy() + 1)
         peak = np.maximum.accumulate(cr)
         return np.max((peak - cr) / (peak + self.eps))
 
-    def compute_alpha(self, model="CAPM"):
+    def evaluate_alpha(self, model="CAPM"):
         y = np.asarray(
             (self.return_logs.numpy() - self.rf.values)
         )
@@ -306,7 +315,7 @@ class OnlinePortfolioOptimizer:
             bins=50, 
             color='orange', 
             alpha=0.7,
-            log=(self.n_assets > 500)
+            log=(self.n_assets > 99)
         )
         ax_weights_dist.set_title("Weight Distribution")
 
@@ -351,6 +360,6 @@ class OnlinePortfolioOptimizer:
             label=f'RF Rate: {rf_today:.4f}'
         )
         ax_ret_dist.set_title("Return Distribution with Daily RF Threshold")
+        ax_ret_dist.set_xlim(-0.1, 0.1)
         ax_ret_dist.legend()
-
         plt.tight_layout()
