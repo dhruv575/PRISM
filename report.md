@@ -1,171 +1,223 @@
+
+# STAT 4830 Final Report
+
 # Portfolio Refinement Through Iterative Sequential Modeling (PRISM)
 
-## 1. Problem Statement
+**Team PRISM:** Dhruv Gupta, Aiden Lee, Frank Ma, Kelly Wang, Didrik Wiig-Andersen
 
-Our goal is to optimize a daily portfolio of assets to achieve high risk-adjusted returns while respecting certain constraints on leverage, drawdown, and volatility. Specifically, our project focuses on maximizing a combination of financial risk metrics and ratios while limiting maximum drawdown over a given historical period.
+---
 
-### Why This Matters
-- Traditional mean-variance optimization oversimplifies risk by only using variance.
-- Real-world portfolios must manage multiple risk dimensions (drawdown, volatility) and practical constraints (leverage, short selling) at the same time.
-- Variability in the real-world and extreme events (like COVID) don't follow a nice and familiar distribution, so due to their unprediciatbility, traditional trading strategies have different tolerance levels to these unexpected events.
-- By addressing these complexities, we aim to create a more realistic and robust decision-making strategy for creating a dynamic portfolio.
+## 1. The Stock Market Problem
 
-### Success Metric
-**Fitness Score** - What goes into the score
-- Sortino Ratio = $\frac{E[R_p - R_f]}{\sigma_d}$
+The stock market operates under extreme uncertainty, influenced by a complex web of macroeconomic, geopolitical, and behavioral factors. Traditional portfolio strategies, while useful in theory, often fail under real-world stresses like the 2007-2008 financial, COVID-19 global lockdown, and the current rapid changes in tariff policies that the second Trump administration has been proposing.
 
-Where: $R_p$ = Return of the portfolio | $R_f$ = Risk-free rate | $\sigma_d$ = Standard deviation of negative asset returns (i.e., downside deviation where returns below a minimum acceptable return or MAR)
-- Expected returns: either estimated with mean historical return or exponentially weighted historical return. 
-- Max drawdown: a strategy that generates sufficient risk adjusted returns may not be favorable if it leads to prolonged and sharp decline in portfolio value. We penalize max drawdown by substracting it from our fitness function. We use an annual window for max drawdown calculation.
-- Factor Exposure - this refers to the sensitivity of an investment, portfolio, or asset to specific risk factors or systematic drivers of returns (not currently implemented)
-- Portfolio Constraints - we ask the model to minimize transaction costs, minimize the change in our stock positions between days, and try to maintain stable returns over time
+### Our Challenge
+- **Challenge:** Develop a trading algorithm that is robust to market shocks and adapts to changing market conditions.
+- **Goal:** Achieve consistently strong returns relative to a "safe" baseline (e.g., index or risk-free investments) while controlling for risk measures.
+- **Outcome:** Build an optimizer that actively balances returns, volatility, risk of extreme losses (drawdowns), and portfolio stability.
 
-### Constraints
-- **Leverage**: May exceed 1 but within a specified maximum (e.g., 1.5–2.0).
-- **Drawdown**: Must remain below a specified percentage (e.g., 20% max drawdown).
-<!-- - **Data**: Historical daily/weekly returns for selected assets (10–30). -->
-- **Transaction costs**: We implement a ceiling on transaction costs everyday. We scale the change in weights by a scaler such that the overall sum of net changes in weights is controlled below a specified ceiling.
-
-### Data Requirements
-- Daily price data from YFinance.
-- Sufficient history to handle training and validation. The goal is to be able to test our model against extreme events like the 2008 Financial Crisis or COVID.
-
-### Potential Pitfalls
-- Overfitting to historical data (backtest bias).
-- Incorrect handling of missing data or survivorship bias.
-- High computational costs if too many assets or constraints are added.
+### Constraints We Address
+- **Drawdown:** Significant drops in portfolio value erode investor confidence. Our model explicitly penalizes portfolios with high drawdown.
+- **Turnover:** Excessive trading leads to high transaction costs. We penalize high turnover to maintain realistic, implementable portfolios.
+- **Concentration Risk:** Investing too heavily in a few assets can be catastrophic. We introduce penalties to ensure a diversified set of investments.
 
 ---
 
 ## 2. Technical Approach
 
-### Mathematical Formulation
-Let $w_i$ denote the weight of asset $i$ in the portfolio. We define the portfolio return as 
+### Literature Review
 
-$$R_P = \sum_{i} w_i \cdot R_i$$
+- **Mean-Variance Optimization (Markowitz, 1952):**
+  - The founding idea of portfolio theory: balance returns vs. variance.
+  - Highlights diversification benefits: adding imperfectly correlated assets reduces risk.
+  - Leads to the "efficient frontier" of optimal risk-return trade-offs.
 
-The portfolio volatility $\sigma_p$ is computed as the annualized standard deviation of the daily portfolio returns, and the maximum drawdown of the portfolio, hereby abbreviated to $MDD(p)$, is computed from the cumulative returns. Given this, our objective function is
+- **Sharpe Ratio (Sharpe, 1966):**
+  - $$SR = \frac{R_p - r_f}{\sigma_p}$$
+  - Measures the risk-adjusted return considering both return and standard deviation.
+  - The portfolio maximizing Sharpe is called the "tangency portfolio."
 
-$$
-\textbf{Maximize } \quad \alpha \cdot \frac{E[R_p - R_f]}{\sigma_d} + \beta \cdot \big(-MDD(p)\big) - \lambda \sum_i \left|w_i - w_i^{\text{prev}}\right|\,
-$$
+- **Conditional Value-at-Risk (CVaR):**
+  - Focuses on tail risk: the expected loss during the worst $\alpha\%$ of cases.
+  - Gained popularity post-2008 crisis for modeling rare but extreme events.
 
-Where:
-- $R_f$ is the risk-free rate, so that $\frac{E[R_p - R_f]}{\sigma_d}$ represents the Sortino ratio.
-- $\alpha$ scales the impact of Sortino ratio.
-- $\beta$ scales the impact of the drawdown term.
-- $\lambda$ is the transaction cost penalty, which penalizes large changes in portfolio weights between periods.
-- $w_i^{\text{prev}}$ denotes the weight of asset $i$ in the previous period.
+### Modeling Metrics
+We expanded beyond Sharpe to include:
 
-The portfolio weights are subject to the following constraints: 
+- **Sortino Ratio:** Measures return relative to downside risk (ignores upside volatility).
+- **Maximum Drawdown:** Measures the worst peak-to-trough decline in portfolio value.
+- **Turnover:** Captures portfolio churning and associated costs.
+- **Concentration Penalty:** Controls the spread of weights across assets (diversification).
 
-- If no leverage: $\sum_i w_i = 1 \quad \text{and} \quad w_i \geq 0 \quad \forall\ i$ 
-- If allowing leverage: $\sum_i |w_i| \leq L_{\max}\,$ where $L_{\max}$ is the maximum allowable leverage.
-- Short-selling limit: $w_i \geq -\delta \quad \forall\ i $ where $ \delta \geq 0$ specifies the maximum allowed short position per asset.
-
-### Algorithm & PyTorch Strategy
-- Represent weights $\mathbf{w}$ as a PyTorch tensor.
-- Compute portfolio returns and risk measures (volatility, drawdown) within the computational graph.
-- Use gradient-based methods (e.g., Adam, LBFGS) to optimize $-\text{objective}$ (because PyTorch minimizes by default).
-- Right now, we are using a decaying learning rate, where the initial learning rate and the rate of decay are hyperparameters of the model.
-
-### Validation Methods
-- **In-Sample Optimization**: Train on a subset of historical data.
-- **Out-of-Sample Backtest**: Test on later data (walk-forward or simple split).
-- Compare results to a baseline (e.g., equal weights).
-
-### Resource Requirements
-- Python 3.8+, PyTorch, NumPy, pandas, matplotlib, yfinance.
-- Sufficient CPU/GPU time for iterative optimization and backtesting with large historical stock market prices.
+These dimensions form a multi-objective framework to balance growth, risk control, and practicality.
 
 ---
 
-## 3. Initial Results
+## 3. Formulation
 
-### Evidence of Working Implementation
-- **Basic Test**: A small 7-asset dataset was loaded into our PyTorch pipeline. \
-  Companies: Tesla, Google, Microsoft, Amazon, Apple, Meta, NVIDIA
-- **Hyperparameters**: We experimented with random values and chose the set that resulted in the best model specifications.
-- **Online Gradient Descent** \
-Our testing only considers the stock market in 2022-2024 and produced weights that resulted in a portfolio that was only outperformed by a portfolio that only contained META and only continaed NVDA. With our updated fitness function using a working OGD algorithm, the score now outperforms all single investment stocks except for NVDA.
+### Objective Function
 
-### Performance Metrics 
-- **Returns**: Cumulative returns performed by the OGD model is consistently returning around 1.5x, which is above all the singular stock investments except NVDA.
-- See the notebook for visuals.
+Our full optimization problem is:
 
-### Test Case Results
-- Verified the objective function calculates returns and volatility correctly.
-- Observed that adding a drawdown penalty can shift weights toward lower-volatility assets.
+$$
+\max_{w_t} \alpha_1 \cdot Sortino_t(R_p, r_f) - \alpha_2 \cdot MaxDD_t(R_p) - \alpha_3 \cdot Turnover(w_t, w_{t-1}) - \alpha_4 \cdot CP(w_t)
+$$
 
-### Current Limitations
-- Minimal data usage (only 24 months of daily returns).
-- An unclear transaction cost function is included in the model, which may not reflect real-world applicability.
+where:
+- $\alpha_i$ are tunable hyperparameters weighting each objective.
+- $w_t$ is the vector of portfolio weights at time $t$.
 
-### Resource Usage Measurements
-- CPU-bound for small datasets; no GPU acceleration used yet.
-- Optimization completes in ~1 second for 7 assets but could scale up with more assets.
+### Constraints
 
-### Unexpected Challenges
-- Handling negative weights for short selling in PyTorch required a custom clip function.
-- Integrating maximum drawdown in the computational graph introduced complexity in gradient calculation.
+- **Budget constraint:**
+  $$ \sum_{i=1}^N w_{t,i} = 1 $$
+
+- **Long-only (no short selling):**
+  $$ w_{t,i} \geq 0 \quad \text{for all} \quad i, t $$
+
+Additional leverage and short-selling scenarios are being explored as next steps.
 
 ---
 
-## 4, Intermediate results
-We added more stocks to our selection universe. Instead of a toy sample with Mag 7, we expanded to 109 stocks from a range of industries. Additionally, we also added entropy within our model specification to control the number of stocks that the optimizer chooses to take a position in. 
+## 4. Variable Definitions
 
-### Test Case Results
-Model identified NVDA as the stock to take the largest position in. Interestingly the model also picked up Gamestop in May 2024, about a month after its price shot up. 
+- **$R_p$:** Portfolio returns.
+- **$w_{i,t}$:** Weight assigned to asset $i$ at time $t$.
+- **$R_{i,t}$:** Return of asset $i$ at time $t$.
+- **$r_{f,t}$:** Risk-free rate at time $t$.
+- **$m$:** Size of the rolling window for metrics calculation.
+- **$\epsilon$:** Small constant added to denominators for numerical stability.
 
-### Unexpected Challenges
-- The effects of adding entropy to objective function does not match what we expected. 
+### Metric Formulas
 
+- **Sortino Ratio:**
+  $$
+  Sortino_t(R_p, r_f) = \frac{E[R_p - r_f]}{\sigma_{downside} + \epsilon}
+  $$
 
-## 5. Next Steps
+- **Maximum Drawdown:**
+  $$
+  MaxDD_t(R_p) = \frac{\max_{T \in [t-m,t]} CR_T - CR_t}{\max_{T \in [t-m,t]} CR_T + \epsilon}
+  $$
 
-1. **Expand Data Universe**  
-   - Through proper entropy / sparsity controls, we hope to eventually increase our stock universe further. Intermediate results suggest the model is somewhat successful in stock picking. 
-   - Acquire a longer historical window and consider testing our model against time periods where there where sudden shocks to the market due to extreme events.
-     -  We will also consider the question: How long of historical window matters?
+- **Turnover:**
+  $$
+  Turnover(w_t, w_{t-1}) = \frac{1}{2} \sum_{i=1}^{N} |w_{i,t} - w_{i,t-1}|
+  $$
 
+- **Concentration Penalty (CP):**
+  $$
+  CP(w_t) = \max(ENP_{min} - ENP(w_t), 0) + \max(ENP(w_t) - ENP_{max}, 0)
+  $$
 
-2. **Refine Constraints**  
-   - Right now, we are setting a ceiling on total transaction costs. Ideally, we would want to penalize transaction costs or turnover as part of our objective function.
-   - Enforce leverage up to 1.5, short selling up to 30% of portfolio. 
-   - Evaluate how these constraints interact with drawdown penalty.
-   - Integrate more advanced risk measures like conditional value-at-risk.
-     - Review the literature on alternative risk measures we should consider incorporating.
-     - VaR, expected loss (expected loss given loss)
+- **Effective Number of Positions (ENP):**
+  $$
+  ENP(w_t) = \frac{1}{\sum_{i=1}^{N} (w_{i,t})^2 + \epsilon}
+  $$
 
-3. **Rolling Optimization**  
-   - Implement a time-series approach to rebalance daily/monthly/quarterly.
-   - We can potentially experiment with different rebalancing frequencies and compare performance. 
+---
 
-4. **Short Selling**
-    - We know that the possibility to go short on certain assets is a key assumption in traditional mean variance portfolio analysis. We would want to test our optimizer under similar conditions.
-     
-6. **Transaction Costs**  
-   - Add a penalty for changing weights significantly between rebalances.
+## 5. Methodology
 
-7. **Advanced Validation**  
-   - Perform a walk-forward validation to reduce overfitting risk.
-   - Compare with multiple baselines (index funds, risk-parity strategy).
-   - Test our model with real-time data implementation
+### Algorithm Selection
 
-8. **Other Methods to Consider**
+- **Online Gradient Descent (OGD):**
+  - Sequential learning: updates portfolio one day at a time.
+  - Adaptable to shocks without retraining on entire history.
+  - Handles differentiable objectives like Sortino, Turnover dynamically.
 
-   We need to account for cases when the weights we put on our stocks are too sparse. There should be a mechancism to add a penalty for the sum of the weights $w_i$. We need more flexibility in our objective function to improve the way we account for the risk in the stock market.
-   - Online Multiplicative Weights
-     - Look into using multiplicative experts.
-   - Online Mirror Descent
-     - Think of stocks at the sector level. Then, the goal is to maximize entropy $\sum_i w_i \cdot \log(w_i)$. Look into the Bregman divergence.
+### Hyperparameter Tuning
 
-10. **Some code refactoring**
-- Tidy up code base, currently we have some functions that are similar in functionality but sitting inisde / outside of our optimizer class depending on whether they are working with train or test data. 
+- **Objective Weights:** Balancing $\alpha_1$ through $\alpha_4$.
+- **Learning Rate:** Key for stability vs. responsiveness.
+- **Window Sizes:** Chosen based on trading horizons (daily, monthly, yearly).
+- **Concentration Controls:** Tuning $ENP_{min}$ and $ENP_{max}$ to maintain diversification.
 
+Explored via grid search and Bayesian optimization (Gaussian Process Minimization) to find near-optimal combinations.
 
-**What We’ve Learned So Far**  
-- Multi-objective optimization in finance can quickly become complex.
-- PyTorch’s auto-differentiation helps but requires careful handling of constraints.
-- Good data hygiene (cleaning, consistent date alignment) is critical.
-- We are influencing our portfolio with hindsight bias due to the fact that we chose the 7 firms that it can invest in. The choices we made depend on our knowledge of the past, so it is necessary to remove our influence on the model.
+---
+
+## 6. Implementation
+
+### Key Design Choices
+
+- **Framework:**
+  - PyTorch for automatic differentiation and efficient tensor computation.
+
+- **Techniques:**
+  - **Softmax normalization:** Enforces the budget constraint smoothly.
+  - **Rolling Window:** Metrics calculated over moving historical windows.
+  - **Custom Stability Fixes:** Adding epsilons to prevent divide-by-zero errors.
+
+### Challenges Faced
+
+- **Computational Cost:** Scaling to 100+ assets strained memory and processing.
+- **Concentration Handling:** Balancing return optimization with diversification penalties required iterative tuning.
+- **Drawdown Differentiability:** Maximum drawdown involves non-smooth operations, making gradient calculation difficult.
+
+Solutions included memory-efficient batching, adaptive learning rates, and careful mathematical approximations.
+
+---
+
+## 7. Demonstration
+
+We hosted a working demo on Hugging Face Spaces to showcase model behavior:
+- **[Demo Link](https://droov-opt.hf.space/)**
+- Allows users to see how portfolios evolved over time.
+
+---
+
+## 8. Results
+
+### Observations
+
+- **Full Objective:**
+  - Consistently outperformed equal-weighted benchmarks.
+  - Concentration in tech stocks (AMZN, NVDA) still problematic.
+
+- **Sortino Only:**
+  - High returns but unacceptable volatility.
+
+- **Sortino + MaxDD:**
+  - Returns improved; volatility still higher than desired.
+
+- **Sortino + MaxDD + Turnover:**
+  - Best balance of returns and trading stability, but minor concentration risk persisted.
+
+### Final Performance Metrics
+
+| Metric | Value |
+|:---|:---|
+| Sharpe Ratio | 0.0363 |
+| Max Drawdown | 60.6% |
+| Annualized Excess Return | 7.44% |
+
+**Interpretation:** While the strategy achieves reasonable returns, the severe drawdown highlights the difficulty of fully mitigating tail risk in highly concentrated portfolios.
+
+---
+
+## 9. Reflections
+
+### Primary Challenges
+- Choosing and tuning objective function weights without overfitting.
+- Managing concentration without overly diluting returns.
+- Maintaining computational efficiency while expanding stock universe.
+
+### Lessons Learned
+- **Data Hygiene:** Proper data cleaning and synchronization is crucial.
+- **PyTorch:** Migration was painful but necessary for scalability and differentiability.
+- **Diversification:** Essential for practical portfolio management.
+
+### Evolution of the Project
+- **Phase 1:** Simple 7-stock Sortino optimization (Numpy).
+- **Phase 2:** PyTorch OGD implementation.
+- **Phase 3:** Expanded universe (109 stocks), added Turnover and ENP penalties.
+
+### AI Assistance
+- **Claude:** Helped kickstart early PyTorch setup.
+- **ChatGPT:** Helped structure project milestones and refine final documentation.
+
+---
+
+# Conclusion
+We successfully built a dynamic, multi-objective portfolio optimizer capable of adapting daily to market shifts. Although the final model is not perfect — particularly around concentration and extreme drawdowns—it reflects a significant leap from traditional static portfolio approaches. With further improvements around risk management and transaction cost modeling, PRISM could serve as a practical backbone for real-world asset management strategies.
