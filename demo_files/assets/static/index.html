@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Optimizer</title>
+  <link rel="stylesheet" href="/portfolio_static/style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0/dist/chartjs-adapter-luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="title-container">
+        <h1>Portfolio Optimizer</h1>
+      </div>
+      <nav class="nav-menu">
+        <a href="/index.html" class="nav-link active">Simulation</a>
+        <a href="/education.html" class="nav-link">Education</a>
+      </nav>
+    </header>
+    
+    <div class="main-content">
+      <div class="left-panel">
+        <!-- Configuration Card -->
+        <div class="config-card">
+          <h2 class="config-title">Portfolio Configuration</h2>
+          <div class="config-grid">
+            <div class="config-field">
+              <label class="config-label">Start Date:</label>
+              <input type="date" id="startDate" class="config-input">
+            </div>
+            <div class="config-field">
+              <label class="config-label">End Date:</label>
+              <input type="date" id="endDate" class="config-input">
+            </div>
+            <div class="config-field">
+              <label class="config-label">Learning Rate:</label>
+              <input type="number" id="learningRate" class="config-input" value="0.1" min="0.001" step="0.001">
+            </div>
+            <div class="config-field">
+              <label class="config-label">Window Size:</label>
+              <input type="number" id="windowSize" class="config-input" value="20" min="5">
+            </div>
+            <button id="runButton" class="run-button">Run Allocation</button>
+          </div>
+          
+          <div class="alpha-controls">
+            <h3 class="alpha-title">Objective Function Weights</h3>
+            <div class="alpha-grid">
+              <div class="config-field">
+                <label class="config-label">Sortino Ratio:</label>
+                <input type="number" id="alphaSortino" class="config-input" value="1.0" min="0" step="0.1">
+              </div>
+              <div class="config-field">
+                <label class="config-label">Max Drawdown:</label>
+                <input type="number" id="alphaMaxDrawdown" class="config-input" value="1.0" min="0" step="0.1">
+              </div>
+              <div class="config-field">
+                <label class="config-label">Turnover:</label>
+                <input type="number" id="alphaTurnover" class="config-input" value="0.1" min="0" step="0.1">
+              </div>
+            </div>
+          </div>
+          
+          <div class="advanced-controls">
+            <h3 class="alpha-title">Advanced Settings</h3>
+            <div class="alpha-grid">
+              <div class="config-field">
+                <label class="config-label">Concentration:</label>
+                <input type="number" id="alphaConcentration" class="config-input" value="0.25" min="0" step="0.1">
+              </div>
+              <div class="config-field">
+                <label class="config-label">Min Positions:</label>
+                <input type="number" id="enpMin" class="config-input" value="5.0" min="1.0" step="0.5">
+              </div>
+              <div class="config-field">
+                <label class="config-label">Max Positions:</label>
+                <input type="number" id="enpMax" class="config-input" value="20.0" min="1.0" step="0.5">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="graph-container">
+          <!-- Cumulative Returns Chart -->
+          <div class="chart-card">
+            <h3 class="chart-title">Cumulative Returns</h3>
+            <div class="chart-content">
+              <canvas id="returnsChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Weight Evolution Chart -->
+          <div class="chart-card">
+            <h3 class="chart-title">Weight Evolution</h3>
+            <div class="chart-content">
+              <canvas id="weightsChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Concentration Chart -->
+          <div class="chart-card">
+            <h3 class="chart-title">Portfolio Concentration</h3>
+            <div class="chart-content">
+              <canvas id="concentrationChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Stats Row -->
+          <div class="stats-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%;">
+            <!-- Dynamically generated stats grid will be placed here -->
+          </div>
+          
+          <!-- Legacy elements for backward compatibility -->
+          <div style="display:none" aria-hidden="true">
+            <span id="ogdSharpeRatio">-</span>
+            <span id="ogdMaxDrawdown">-</span>
+            <span id="ogdReturn">-</span>
+            <span id="ogdCAPMAlpha">-</span>
+            <span id="ogdFF3Alpha">-</span>
+            <span id="ewSharpeRatio">-</span>
+            <span id="ewMaxDrawdown">-</span>
+            <span id="ewReturn">-</span>
+            <span id="ewCAPMAlpha">-</span>
+            <span id="ewFF3Alpha">-</span>
+            <span id="randomSharpeRatio">-</span>
+            <span id="randomMaxDrawdown">-</span>
+            <span id="randomReturn">-</span>
+            <span id="randomCAPMAlpha">-</span>
+            <span id="randomFF3Alpha">-</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="right-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Select Tickers</h3>
+          <div class="ticker-controls">
+            <button id="selectAllBtn" class="ticker-button">Select All</button>
+            <button id="deselectAllBtn" class="ticker-button">Deselect All</button>
+          </div>
+        </div>
+        <div class="stock-list" id="stockList">
+          <!-- Stock sectors and tickers will be populated here -->
+          <div class="loading-text">Loading tickers...</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+      <div class="spinner"></div>
+      <div class="loading-text">Optimizing Portfolio...</div>
+    </div>
+  </div>
+
+  <script src="/portfolio_static/script.js"></script>
+</body>
+</html> 

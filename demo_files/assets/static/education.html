@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Optimizer - Education</title>
+  <link rel="stylesheet" href="/portfolio_static/style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0/dist/chartjs-adapter-luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="title-container">
+        <h1>Portfolio Optimizer</h1>
+      </div>
+      <nav class="nav-menu">
+        <a href="/index.html" class="nav-link">Simulation</a>
+        <a href="/education.html" class="nav-link active">Education</a>
+      </nav>
+    </header>
+    
+    <div class="education-container">
+      <div class="education-header">
+        <h2>Educational Resources</h2>
+        <p>
+          This page is designed to help you understand the components of our portfolio optimization objective function.
+          Through interactive demonstrations with synthetic data, you'll see how different components affect portfolio performance
+          and learn the mathematical concepts behind modern portfolio theory and online convex optimization.
+        </p>
+      </div>
+      
+      <div class="variable-definitions">
+        <h3>Variable Definitions</h3>
+        <div class="variable-grid">
+          <div class="variable-math">
+            <span class="math-symbol">w<sub>t</sub> ∈ ℝ<sup>N</sup></span>
+          </div>
+          <div class="variable-description">
+            Portfolio weights at time t
+          </div>
+          
+          <div class="variable-math">
+            <span class="math-symbol">R<sub>t</sub> ∈ ℝ</span>
+          </div>
+          <div class="variable-description">
+            Portfolio return at time t
+          </div>
+          
+          <div class="variable-math">
+            <span class="math-symbol">r<sub>f,t</sub> ∈ ℝ</span>
+          </div>
+          <div class="variable-description">
+            Risk-free rate at time t
+          </div>
+          
+          <div class="variable-math">
+            <span class="math-symbol">a<sub>i</sub> ∈ ℝ<sub>+</sub></span>
+          </div>
+          <div class="variable-description">
+            Objective weights, i ∈ {1,2,3,4}
+          </div>
+          
+          <div class="variable-math">
+            <span class="math-symbol">ε ∈ ℝ<sub>+</sub></span>
+          </div>
+          <div class="variable-description">
+            Small constant for numerical stability
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sharpe Ratio Section -->
+      <div class="subsection" id="sharpe-ratio">
+        <h3>Sharpe Ratio</h3>
+        <p>
+          The Sharpe ratio, developed by Nobel laureate William F. Sharpe, is one of the most widely used measures of 
+          risk-adjusted performance in finance. It quantifies the excess return per unit of total risk in an investment,
+          providing a standardized way to compare different portfolios or assets.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Sharpe Ratio Formula:</p>
+            <div class="formula-content">
+              <p>Sharpe(r, r<sub>f</sub>) = <span class="fraction"><span class="numerator">E[R<sub>t</sub> - r<sub>f,t</sub>]</span><span class="denominator">σ<sub>total</sub> + ε</span></span></p>
+              <p class="formula-notation">where</p>
+              <p>σ<sub>total</sub> = <span class="sqrt"><span class="sqrt-content"><span class="fraction"><span class="numerator">1</span><span class="denominator">T</span></span> ∑<sub>t=1</sub><sup>T</sup> (R<sub>t</sub> - E[R<sub>t</sub>])<sup>2</sup></span></span></p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>E[R<sub>t</sub> - r<sub>f,t</sub>]</strong>: Expected excess return (portfolio return minus risk-free rate)</p>
+            <p><strong>σ<sub>total</sub></strong>: Total volatility (standard deviation of all returns)</p>
+            <p><strong>ε</strong>: Small constant to avoid division by zero when volatility is zero</p>
+          </div>
+        </div>
+        
+        <p>
+          The Sharpe ratio measures the performance of an investment compared to a risk-free asset, after adjusting for risk.
+          A higher Sharpe ratio indicates better risk-adjusted performance. However, one limitation of the Sharpe ratio is that
+          it penalizes both upside and downside volatility equally, which may not align with investors' preferences.
+        </p>
+      </div>
+      
+      <!-- Sortino Ratio Section -->
+      <div class="subsection" id="sortino-ratio">
+        <h3>Sortino Ratio</h3>
+        <p>
+          The Sortino ratio is a modification of the Sharpe ratio that differentiates harmful volatility from total overall volatility.
+          It was developed by Frank A. Sortino in the early 1980s and has become an important risk-adjusted performance metric in 
+          portfolio management. Unlike the Sharpe ratio, which penalizes both upside and downside volatility equally, 
+          the Sortino ratio only penalizes downside volatility - recognizing that investors are typically concerned
+          with the risk of losing money rather than the "risk" of making more than expected.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Sortino Ratio Formula:</p>
+            <div class="formula-content">
+              <p>Sortino(r, r<sub>f</sub>) = <span class="fraction"><span class="numerator">E[R<sub>t</sub> - r<sub>f,t</sub>]</span><span class="denominator">σ<sub>downside</sub> + ε</span></span></p>
+              <p class="formula-notation">where</p>
+              <p>σ<sub>downside</sub> = <span class="sqrt"><span class="sqrt-content"><span class="fraction"><span class="numerator">1</span><span class="denominator">T</span></span> ∑<sub>t=1</sub><sup>T</sup> min(R<sub>t</sub> - r<sub>f,t</sub>, 0)<sup>2</sup></span></span></p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>E[R<sub>t</sub> - r<sub>f,t</sub>]</strong>: Expected excess return (portfolio return minus risk-free rate)</p>
+            <p><strong>σ<sub>downside</sub></strong>: Downside deviation (standard deviation of negative returns only)</p>
+            <p><strong>ε</strong>: Small constant to avoid division by zero when downside deviation is zero</p>
+          </div>
+        </div>
+        
+        <p>
+          In our objective function, maximizing the Sortino ratio is the first term. By focusing on downside risk,
+          our optimization algorithm seeks to maximize returns while minimizing the risk of significant losses, 
+          which aligns with most investors' preferences and behavioral tendencies.
+        </p>
+        
+        <!-- Sharpe vs Sortino Comparison -->
+        <div class="comparison-section">
+          <h4>Comparing Sharpe and Sortino Ratios</h4>
+          <p>
+            The key difference between these two ratios lies in how they measure risk:
+          </p>
+          <ul>
+            <li><strong>Sharpe ratio</strong> uses total volatility (both upside and downside)</li>
+            <li><strong>Sortino ratio</strong> uses only downside deviation</li>
+          </ul>
+          <p>
+            This difference becomes particularly important in assets with asymmetric return distributions or during periods
+            of market turbulence. The interactive demonstration below shows how these ratios can diverge significantly
+            for the same asset, especially when return patterns are non-normal.
+          </p>
+        </div>
+        
+        <div class="interactive-demo">
+          <h4>Interactive Demonstration</h4>
+          <p>
+            Below are three charts showing the performance of three synthetic assets with distinctly different risk-return profiles over a 4-month period.
+            The charts display the cumulative returns, 10-day Sharpe ratios, and 10-day Sortino ratios respectively.
+            Notice how the Sharpe ratio responds to all volatility while the Sortino ratio responds only to downside volatility.
+          </p>
+          
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Cumulative Returns</h4>
+              <canvas id="returnsChart"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Sharpe Ratios</h4>
+              <canvas id="sharpeChart"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Sortino Ratios</h4>
+              <canvas id="sortinoChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="asset-descriptions">
+            <div class="asset-description" style="background-color: rgba(30, 32, 44, 0.6); border-left: 4px solid rgba(255, 99, 132, 1); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+              <h5 style="color: rgba(255, 99, 132, 1);">Asset A: Volatile with Spike Patterns</h5>
+              <p>This asset exhibits a "spikey" pattern with dramatic upward and downward movements, resulting in high volatility and unpredictable Sharpe and Sortino ratios.</p>
+            </div>
+            <div class="asset-description" style="background-color: rgba(30, 32, 44, 0.6); border-left: 4px solid rgba(54, 162, 235, 1); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+              <h5 style="color: rgba(54, 162, 235, 1);">Asset B: Exponential Growth with Limited Downside</h5>
+              <p>This asset follows an exponential growth curve with very limited downside risk, resulting in a Sortino ratio that outperforms its Sharpe ratio.</p>
+            </div>
+            <div class="asset-description" style="background-color: rgba(30, 32, 44, 0.6); border-left: 4px solid rgba(75, 192, 192, 1); padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+              <h5 style="color: rgba(75, 192, 192, 1);">Asset C: Linear Growth with Minimal Volatility</h5>
+              <p>This asset shows a nearly linear growth pattern with very low volatility in both directions, making it highly predictable with similar Sharpe and Sortino ratios.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Maximum Drawdown Section -->
+      <div class="subsection" id="maximum-drawdown">
+        <h3>Maximum Drawdown</h3>
+        <p>
+          Maximum Drawdown (MDD) is a key risk metric that measures the largest peak-to-trough decline in the value of a portfolio 
+          before a new peak is achieved. Unlike volatility-based metrics that treat upward and downward movements equally, 
+          maximum drawdown specifically focuses on the largest sustained loss an investor might experience, making it 
+          particularly important for assessing downside risk.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Maximum Drawdown Formula:</p>
+            <div class="formula-content">
+              <p>MaxDD(r) = <span class="fraction"><span class="numerator">max<sub>t∈[1,T]</sub> CR<sub>t</sub> - CR<sub>T</sub></span><span class="denominator">max<sub>t∈[1,T]</sub> CR<sub>t</sub> + ε</span></span></p>
+              <p class="formula-notation">where</p>
+              <p>CR<sub>t</sub> = ∏<sub>i=1</sub><sup>t</sup>(1 + R<sub>i</sub>)</p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>CR<sub>t</sub></strong>: Cumulative return at time t</p>
+            <p><strong>max<sub>t∈[1,T]</sub> CR<sub>t</sub></strong>: Maximum cumulative return up to time T</p>
+            <p><strong>CR<sub>T</sub></strong>: Final cumulative return</p>
+            <p><strong>ε</strong>: Small constant for numerical stability</p>
+          </div>
+        </div>
+        
+        <p>
+          In our objective function, minimizing maximum drawdown is the second term. By reducing the severity of prolonged 
+          declines, our optimization algorithm aims to protect capital during market downturns while still seeking growth 
+          opportunities. This is especially valuable for investors with lower risk tolerance or shorter time horizons.
+        </p>
+        
+        <div class="interactive-demo">
+          <h4>Interactive Demonstration</h4>
+          <p>
+            Below are two charts demonstrating maximum drawdown for three synthetic assets over a 4-month period.
+            The left chart shows the cumulative returns with the maximum drawdown periods highlighted, while the right chart
+            displays the drawdown percentage over time (distance from previous peak). Notice how different return patterns lead to 
+            varying drawdown profiles, even for assets with similar overall returns.
+          </p>
+          
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Cumulative Returns with Drawdown Periods</h4>
+              <canvas id="mddReturnsChart"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Drawdown Percentage</h4>
+              <canvas id="drawdownChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="asset-descriptions">
+            <div class="asset-description">
+              <h5>Asset D: Steady Growth with One Major Correction</h5>
+              <p>This asset shows generally positive performance but experiences one significant correction, creating a large maximum drawdown despite good overall returns.</p>
+            </div>
+            <div class="asset-description">
+              <h5>Asset E: Volatile with Frequent Drawdowns</h5>
+              <p>This asset has multiple smaller drawdowns throughout the period, demonstrating how frequent minor corrections affect the drawdown profile.</p>
+            </div>
+            <div class="asset-description">
+              <h5>Asset F: Declining Trend with Recovery</h5>
+              <p>This asset shows a prolonged decline followed by recovery, illustrating how a negative trend creates extended drawdown periods even with eventual improvement.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Turnover Ratio Section -->
+      <div class="subsection" id="turnover-ratio">
+        <h3>Turnover Ratio</h3>
+        <p>
+          The Turnover Ratio measures the frequency and magnitude of changes in portfolio weights between consecutive time periods. 
+          High turnover typically results in increased transaction costs, which can significantly impact net returns, especially in 
+          strategies with frequent rebalancing. In optimization, controlling turnover is essential for creating portfolios that are 
+          both profitable and practically implementable.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Turnover Ratio Formula:</p>
+            <div class="formula-content">
+              <p>Turnover(w<sub>t</sub>, w<sub>t-1</sub>) = <span class="fraction"><span class="numerator">1</span><span class="denominator">2</span></span> ∑<sub>i=1</sub><sup>N</sup> |w<sub>t,i</sub> - w<sub>t-1,i</sub>|</p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>w<sub>t,i</sub></strong>: Weight of asset i at time t</p>
+            <p><strong>w<sub>t-1,i</sub></strong>: Weight of asset i at time t-1</p>
+            <p><strong>N</strong>: Number of assets in the portfolio</p>
+            <p><strong>0.5 multiplier</strong>: Makes the measure represent the minimum fraction of the portfolio that must be traded</p>
+          </div>
+        </div>
+        
+        <p>
+          In our objective function, minimizing turnover is the third term. The measure ranges from 0 (no change in weights) to 1 
+          (complete portfolio turnover). By penalizing excessive turnover, the optimization algorithm balances the desire for 
+          optimal positioning against the practical costs of frequent trading, resulting in more efficient portfolio adjustments.
+        </p>
+        
+        <div class="interactive-demo">
+          <h4>Interactive Demonstration</h4>
+          <p>
+            Below are three examples of different portfolio turnover patterns, each showing a 3-asset portfolio over time.
+            The left charts show weight allocations for each strategy, while the right charts display the corresponding turnover ratio. 
+            These examples illustrate how different rebalancing approaches impact turnover and associated trading costs.
+          </p>
+          
+          <!-- Portfolio 1: Stable Weights -->
+          <h5 class="demo-title">Portfolio 1: Stable Allocation</h5>
+          <p class="demo-description">
+            This portfolio maintains relatively stable weights over time (approximately 40%, 35%, 25%), with only minor 
+            adjustments to maintain target allocations. Note the consistently low turnover values.
+          </p>
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Portfolio Weights</h4>
+              <canvas id="weightsChart1"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Turnover Ratio</h4>
+              <canvas id="turnoverChart1"></canvas>
+            </div>
+          </div>
+          
+          <!-- Portfolio 2: Erratic Trading -->
+          <h5 class="demo-title">Portfolio 2: Erratic Trading</h5>
+          <p class="demo-description">
+            This portfolio exhibits extreme day-to-day changes in allocations, frequently shifting substantial portions
+            of capital between assets. The resulting high turnover indicates excessive trading costs.
+          </p>
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Portfolio Weights</h4>
+              <canvas id="weightsChart2"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Turnover Ratio</h4>
+              <canvas id="turnoverChart2"></canvas>
+            </div>
+          </div>
+          
+          <!-- Portfolio 3: Gradual Concentration -->
+          <h5 class="demo-title">Portfolio 3: Gradual Concentration</h5>
+          <p class="demo-description">
+            This portfolio starts with equal weights but gradually concentrates all capital into a single asset. 
+            While daily turnover is moderate, the cumulative effect represents a complete portfolio transformation.
+          </p>
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Portfolio Weights</h4>
+              <canvas id="weightsChart3"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Turnover Ratio</h4>
+              <canvas id="turnoverChart3"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Concentration Penalty Section -->
+      <div class="subsection" id="concentration-penalty">
+        <h3>Concentration Penalty</h3>
+        <p>
+          The Concentration Penalty helps maintain a balanced portfolio by discouraging excessive concentration in a small number of assets
+          or excessive diversification across too many assets. It uses the concept of Effective Number of Positions (ENP),
+          which measures portfolio diversification based on the Herfindahl-Hirschman Index (HHI),
+          a common measure of market concentration used in economics and finance.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Concentration Penalty Formula:</p>
+            <div class="formula-content">
+              <p>CP(w<sub>t</sub>) = max(ENP<sub>min</sub> - ENP(w<sub>t</sub>), 0) + max(ENP(w<sub>t</sub>) - ENP<sub>max</sub>, 0)</p>
+              <p class="formula-notation">where</p>
+              <p>ENP(w<sub>t</sub>) = <span class="fraction"><span class="numerator">1</span><span class="denominator">HHI(w<sub>t</sub>) + ε</span></span></p>
+              <p>HHI(w<sub>t</sub>) = ∑<sub>i=1</sub><sup>N</sup> w<sub>t,i</sub><sup>2</sup></p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>ENP<sub>min</sub></strong>: Minimum target for the effective number of positions</p>
+            <p><strong>ENP<sub>max</sub></strong>: Maximum target for the effective number of positions</p>
+            <p><strong>ENP(w<sub>t</sub>)</strong>: Effective number of positions at time t</p>
+            <p><strong>HHI(w<sub>t</sub>)</strong>: Herfindahl-Hirschman Index at time t</p>
+            <p><strong>w<sub>t,i</sub></strong>: Weight of asset i at time t</p>
+            <p><strong>ε</strong>: Small constant for numerical stability</p>
+          </div>
+        </div>
+        
+        <p>
+          In our objective function, the concentration penalty is the fourth term. It creates a "target range" for portfolio
+          diversification, adding a penalty when the portfolio's ENP falls below ENP<sub>min</sub> or exceeds ENP<sub>max</sub>.
+          This approach allows us to control portfolio concentration within desired bounds, balancing the benefits of diversification
+          against the potential for overdiversification.
+        </p>
+        
+        <div class="interactive-demo">
+          <h4>Interactive Demonstration</h4>
+          <p>
+            Below are examples showing how different portfolio weight distributions affect concentration metrics, 
+            with ENP targets of 3 (minimum) and 8 (maximum). The visualizations demonstrate how portfolios
+            with the same number of assets can have very different effective concentrations.
+          </p>
+          
+          <!-- Portfolio Concentration Demo -->
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>Portfolio Weight Distributions</h4>
+              <canvas id="concentrationWeightsChart"></canvas>
+            </div>
+            <div class="edu-chart">
+              <h4>Effective Number of Positions (ENP)</h4>
+              <canvas id="enpChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="concentration-explanations">
+            <div class="concentration-example">
+              <h5>Highly Concentrated Portfolio</h5>
+              <p>
+                This portfolio has most of its weight in just a few assets, resulting in an ENP below the minimum target.
+                The concentration penalty encourages adding more diversification to reach the target range.
+              </p>
+              <div class="enp-indicator">
+                <span class="enp-value">ENP ≈ 2.1</span>
+                <div class="enp-bar">
+                  <div class="enp-progress" style="width: 26%;"></div>
+                  <div class="enp-marker min-marker" style="left: 37.5%;">Min</div>
+                  <div class="enp-marker max-marker" style="left: 100%;">Max</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="concentration-example">
+              <h5>Balanced Portfolio</h5>
+              <p>
+                This portfolio has a balanced distribution of weights across assets, with an ENP within the target range.
+                No concentration penalty is applied since the portfolio diversification is optimal.
+              </p>
+              <div class="enp-indicator">
+                <span class="enp-value">ENP ≈ 5.8</span>
+                <div class="enp-bar">
+                  <div class="enp-progress" style="width: 72.5%;"></div>
+                  <div class="enp-marker min-marker" style="left: 37.5%;">Min</div>
+                  <div class="enp-marker max-marker" style="left: 100%;">Max</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="concentration-example">
+              <h5>Overly Diversified Portfolio</h5>
+              <p>
+                This portfolio has weights spread too thinly across many assets, with an ENP exceeding the maximum target.
+                The concentration penalty encourages more focus on fewer positions.
+              </p>
+              <div class="enp-indicator">
+                <span class="enp-value">ENP ≈ 9.6</span>
+                <div class="enp-bar">
+                  <div class="enp-progress" style="width: 120%;"></div>
+                  <div class="enp-marker min-marker" style="left: 37.5%;">Min</div>
+                  <div class="enp-marker max-marker" style="left: 100%;">Max</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- HHI vs ENP Relationship -->
+          <h5 class="demo-title">Relationship Between HHI and ENP</h5>
+          <p class="demo-description">
+            The chart below shows the inverse relationship between the Herfindahl-Hirschman Index (HHI) and the Effective Number of Positions (ENP).
+            As HHI increases (more concentration), ENP decreases (fewer effective positions).
+          </p>
+          <div class="chart-container">
+            <div class="edu-chart">
+              <h4>HHI vs ENP Relationship</h4>
+              <canvas id="hhiEnpChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Integrated Objective Function Section -->
+      <div class="subsection" id="objective-function">
+        <h3>Integrated Objective Function</h3>
+        <p>
+          Our portfolio optimization approach combines all the previously discussed components into a single objective function.
+          This integrated approach allows us to balance multiple competing goals simultaneously:
+          maximizing risk-adjusted returns (Sortino ratio), minimizing maximum drawdown, controlling turnover, 
+          and maintaining an appropriate level of diversification.
+        </p>
+        
+        <div class="formula-container">
+          <div class="formula">
+            <p class="formula-header">Objective Function:</p>
+            <div class="formula-content">
+              <p>max<sub>w<sub>t</sub></sub> α<sub>1</sub> · Sortino(r, r<sub>f</sub>) - α<sub>2</sub> · MaxDD(r) - α<sub>3</sub> · Turnover(w<sub>t</sub>, w<sub>t-1</sub>) - α<sub>4</sub> · CP(w<sub>t</sub>)</p>
+              <p class="formula-notation">subject to:</p>
+              <p>Σ<sub>i=1</sub><sup>N</sup> w<sub>t,i</sub> = 1 and w<sub>t,i</sub> ≥ 0 ∀t,i</p>
+            </div>
+          </div>
+          <div class="formula-explanation">
+            <p><strong>α<sub>1</sub>, α<sub>2</sub>, α<sub>3</sub>, α<sub>4</sub></strong>: Objective weights that control the relative importance of each component</p>
+            <p><strong>Sortino(r, r<sub>f</sub>)</strong>: The Sortino ratio</p>
+            <p><strong>MaxDD(r)</strong>: Maximum drawdown</p>
+            <p><strong>Turnover(w<sub>t</sub>, w<sub>t-1</sub>)</strong>: Portfolio turnover</p>
+            <p><strong>CP(w<sub>t</sub>)</strong>: Concentration penalty</p>
+          </div>
+        </div>
+        
+        <p>
+          The objective weights (α) allow us to customize the optimization for different investor preferences and market conditions.
+          For example, increasing α<sub>2</sub> puts more emphasis on drawdown protection, which may be preferable during volatile markets,
+          while increasing α<sub>3</sub> reduces turnover for more tax-efficient or lower-cost implementations.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/portfolio_static/education.js"></script>
+</body>
+</html> 

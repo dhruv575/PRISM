@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Optimizer - Full Page</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #1e1e24;
+      color: #ffffff;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    .header {
+      padding: 16px;
+      background-color: #2a2a30;
+      border-bottom: 1px solid #383840;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .nav-link {
+      color: #ffffff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      background-color: #3f88e2;
+      transition: background-color 0.2s;
+    }
+    
+    .nav-link:hover {
+      background-color: #5e9aeb;
+    }
+    
+    .iframe-container {
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    iframe {
+      border: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="title">Portfolio Optimizer</div>
+      <div class="nav-links">
+        <a href="/fullpage" class="nav-link">Simulation</a>
+        <a href="/fullpage/education" class="nav-link">Education</a>
+      </div>
+    </header>
+    
+    <div class="iframe-container">
+      <iframe src="/index.html" id="app-frame" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <script>
+    // Get the current path and update the iframe source accordingly
+    (function() {
+      const path = window.location.pathname;
+      const iframe = document.getElementById('app-frame');
+      
+      if (path.includes('/fullpage/education')) {
+        iframe.src = '/education.html';
+        
+        // Update active state for links
+        const links = document.querySelectorAll('.nav-link');
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.href.includes('/fullpage/education')) {
+            link.classList.add('active');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html> 
