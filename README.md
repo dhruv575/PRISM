@@ -1,206 +1,99 @@
-# STAT 4830 Project Repository
+# PRISM: Portfolio Refinement Through Iterative Sequential Modeling
 
-Welcome to your project repository! This template helps you develop and implement an optimization project over the semester.
+**Team Members:** Dhruv Gupta, Aiden Lee, Frank Ma, Kelly Wang, Didrik Wiig-Andersen
 
-## Getting Started
+## High-Level Summary
 
-1. **Finding Your Project Idea**
-   - Start with our [Project Ideas Guide](docs/finding_project_ideas.md)
-   - Use AI to explore and refine your ideas
-   - Take time to find something you care about
+**Problem Statement:** Traditional portfolio strategies often fail under real-world market stress. The challenge is to develop a trading algorithm that is robust to market shocks and adapts to changing conditions, aiming for strong risk-adjusted returns while managing drawdown, turnover, and concentration risk.
 
-   It's very important you learn to use AI tools in your work! [Noam Brown](https://x.com/polynoamial/status/1870307185961386366) (OpenAI) says that students should...
-   > Practice working with AI. Human+AI will be superior to human or AI alone for the foreseeable future. Those who can work most effectively with AI will be the most highly valued.
+**Approach:** We developed PRISM, a dynamic portfolio optimizer using Online Gradient Descent (OGD) implemented in PyTorch. It optimizes a multi-objective function balancing Sortino ratio, maximum drawdown, portfolio turnover, and concentration penalties (measured via Effective Number of Positions). The model processes market data sequentially, updating portfolio weights daily based on rolling window calculations of these metrics.
 
-   ![Noam tweet](figures/noam.png)
+**Key Findings/Contributions:**
+- Developed a dynamic, multi-objective portfolio optimizer capable of adapting daily to market shifts.
+- The optimizer, balancing Sortino, Max Drawdown, Turnover, and Concentration, consistently outperformed equal-weighted benchmarks in backtests.
+- Identified and quantified the trade-offs between maximizing returns and controlling risk factors like drawdown and concentration, particularly in tech-heavy portfolios.
+- Implemented the solution using PyTorch, leveraging automatic differentiation for gradient-based optimization.
+- Provided a reusable framework (`src/`) for implementing and testing similar dynamic portfolio optimization strategies.
+- Created an interactive demo showcasing portfolio evolution over time ([Demo Link](https://droov-opt.hf.space/)).
 
-2. **Week 3 Deliverable**
-   - Follow the [Week 3 Instructions](docs/assignments/week3_deliverable_instructions.md)
-   - Required components:
-     - Initial report draft
-     - Self-critique document analyzing your report's strengths and weaknesses
-     - Supporting Jupyter notebooks/code
-   - Due: Friday, January 31, 2025
-
-## Project Development Cycle
-
-Each week follows an OODA (Observe, Orient, Decide, Act) loop that helps you improve your project systematically:
-
-![Project Development Cycle - A diagram showing the OODA loop (Observe, Orient, Decide, Act) adapted for project development. Each phase has specific activities: Observe (Review Report, Check Results), Orient (Write Critique, Find Gaps), Decide (Plan Changes, Set Goals), and Act (Code, Run Tests). The phases are connected by arrows showing the flow of work, with a feedback loop labeled "Iterative Development" completing the cycle.](docs/figures/ooda_loop.png)
-
-Each cycle produces specific deliverables:
-- OBSERVE: Updated report draft
-- ORIENT: Self-critique document
-- DECIDE: Next actions plan
-- ACT: Code changes & results
-
-See the [Week 3 Instructions](docs/assignments/week3_deliverable_instructions.md) for detailed guidance on writing your first self-critique.
-
-## Project Schedule
-
-### Deliverables (Due Fridays)
-- Week 2 (Jan 24): Email Project Team Names to yihuihe@wharton.upenn.edu
-- Week 3 (Jan 31): Report Draft 1 + Code + Self Critique
-- Week 4 (Feb 7): Slides Draft 1
-- Week 5 (Feb 14): Report Draft 2 + Code + Self Critique
-- Week 6 (Feb 21): Slides Draft 2
-- Week 7 (Feb 28): Report Draft 3 + Code + Self Critique
-- Week 8: ⚡ Lightning Talks in Class (Mar 5/7) & Slides Draft 3 due Friday ⚡
-- Spring Break (Mar 8-16)
-- Week 9 (Mar 21): Report Draft 4 + Code + Self Critique
-- Week 10 (Mar 28): Slides Draft 4
-- Week 11 (Apr 4): Report Draft 5 + Code + Self Critique
-- Week 12 (Apr 11): Slides Draft 5
-- Week 13: Final Presentations in Class (Apr 22/24) & Report Draft 6 + Code + Self Critique due Friday (Apr 18)
-- Week 14 (Apr 29): Final Report + Code + Self Critique Due
-
-Note: Instructions for peer feedback will be added throughout the semester for each deliverable.
-
-Each draft builds on the previous one, incorporating feedback and new results. You'll meet with course staff three times during the semester to discuss your progress.
-
-## Project Grading
-
-Each deliverable is graded on five components:
-- Report (20%): Problem statement, methodology, results
-- Implementation (35%): Working code, tests, experiments
-- Development Process (15%): Logs, decisions, iterations
-- Critiques (15%): Reflection and planning
-  - Self-critiques (required)
-  - Peer critiques (when assigned)
-  - Response to feedback
-- Repository Structure (15%): Organization, documentation, clarity
-
-Remember:
-- Quality > Quantity
-- Working > Perfect
-
-## Repository Structure
+## Repository Structure Overview
 
 ```
-your-repo/
-├── README.md                    # This file
-├── report.md                    # Your project report
-├── notebooks/                   # Jupyter notebooks
-├── src/                        # Source code
-├── tests/                      # Test files
-└── docs/
-    ├── finding_project_ideas.md    # Guide to finding your project
-    ├── assignments/                # Assignment instructions
-    ├── llm_exploration/           # AI conversation logs
-    └── development_log.md         # Progress & decisions
+.
+├── README.md                    # You are here!
+├── final_report.md              # Final project report (detailed).
+├── report.md                    # Potentially an earlier or summary report.
+├── requirements.txt             # Python package dependencies.
+├── notebooks/                   # Jupyter notebooks for experiments, visualization, and demos.
+│   └── demo.ipynb               # (Expected) Runnable demo notebook showcasing key functionalities.
+├── src/                         # Source code for the PRISM optimization library and scripts.
+│   ├── __init__.py
+│   ├── optimizers/              # Core optimization logic (e.g., OGD).
+│   ├── metrics/                 # Calculation of Sortino, MDD, Turnover, ENP, etc.
+│   └── utils/                   # Utility functions (data loading, plotting).
+├── data/                        # Placeholder for data files (not included, specify download instructions).
+├── slides/                      # Presentation slides.
+└── _development_history/        # Archive of previous report drafts, critiques, etc. (Not needed for final run).
 ```
+*Note: The exact structure within `src/` and the presence of `demo.ipynb` are inferred; please adjust if needed.*
 
-## Development Environment
+- **`src/`**: Contains the core Python modules for the optimization logic and metric calculations.
+- **`notebooks/`**: Holds Jupyter notebooks, ideally including a `demo.ipynb`.
+- **`final_report.md` / `report.md`**: The detailed written report(s).
+- **`requirements.txt`**: Required Python packages.
+- **`slides/`**: Project presentation slides.
+- **`_development_history/`**: Archival folder showing project evolution, not required for execution.
 
-### Editor Setup
-We recommend using one of these editors:
+## Setup Instructions
 
-1. **VS Code** (Free, Industry Standard)
-   - Download from https://code.visualstudio.com/
-   - Install recommended extensions:
-     - Python
-     - GitHub Pull Requests
-     - GitHub Copilot (FREE for students!)
-       - Sign up at https://education.github.com/discount_requests/application
-       - This gives you FREE access to GitHub Copilot
-       - Plus other GitHub student benefits
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/dhruv575/PRISM
+    cd PRISM
+    ```
 
-2. **Cursor** (Paid Alternative, $20/month)
-   - Built on VS Code with additional AI features
-   - Same interface and shortcuts as VS Code
-   - Same extensions work
-   - Added AI assistance for code exploration
+2.  **Python Version:**
+    Ensure you have Python 3.10 or newer installed (as per the original template, confirm if different).
 
-Both editors work well with Git and provide excellent AI assistance. VS Code with Copilot is recommended for beginners as it's free with your student status and is the industry standard.
+3.  **Create a Virtual Environment (Recommended):**
+    ```bash
+    python -m venv venv
+    # Activate the environment:
+    # Windows:
+    .\\venv\\Scripts\\activate
+    # macOS/Linux:
+    source venv/bin/activate
+    ```
 
-### Required Tools
-- Python 3.10+
-- PyTorch
-- Jupyter Notebook/Lab
-- Git
+4.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Git Setup and Workflow
+5.  **Data:**
+    - The necessary stock data is included in demo_files/data. You can choose to obtain historical stock price data (e.g., from Yahoo Finance, Alpha Vantagem, WRDS) and place it in a location accessible by the scripts/notebooks. Ensure the data format matches what the code expects.
 
-### First Time Setup
-1. Fork this repository
-   - Click "Fork" in the top right
-   - Name it `STAT-4830-[team-name]-project`
-   - This creates your own copy that can receive updates
+## Running the Code
 
-2. Set up Git (if you haven't already):
-   If you installed VS Code or Cursor, they'll help you install Git! Both editors have excellent Git integration built in.
-   
-   For detailed instructions, see the [Official Git installation guide](https://github.com/git-guides/install-git)
+1.  **Activate Virtual Environment:** (If created)
+    ```bash
+    # Windows: .\\venv\\Scripts\\activate
+    # macOS/Linux: source venv/bin/activate
+    ```
 
-   After installing, set up your identity:
-   ```bash
-   git config --global user.name "Your Name"
-   git config --global user.email "your.email@upenn.edu"
-   ```
+2.  **Run the Notebook:**
+    Look at the `final_notebook.ipynb` exists in the `notebooks/` folder:
+    ```bash
+    jupyter notebook notebooks/final_notebook.ipynb
+    # Or: jupyter lab notebooks/final_notebook.ipynb
+    ```
+    Follow the instructions within the notebook.
 
-3. Clone your fork:
-   ```bash
-   # HTTPS (easier):
-   git clone https://github.com/[your-username]/STAT-4830-[team-name]-project.git
+## Executable Demo Link
 
-   # SSH (if you've set up SSH keys):
-   git clone git@github.com:[your-username]/STAT-4830-[team-name]-project.git
-   
-   cd STAT-4830-[team-name]-project
-   ```
+Explore an interactive demo of our project hosted on Hugging Face Spaces:
 
-4. Add upstream remote (to get updates):
-   ```bash
-   # HTTPS:
-   git remote add upstream https://github.com/damek/STAT-4830-project-base.git
-
-   # SSH:
-   git remote add upstream git@github.com:damek/STAT-4830-project-base.git
-   ```
-
-5. Add your team members as collaborators:
-   - Go to your repo on GitHub
-   - Settings → Collaborators → Add people
-   - Add using their GitHub usernames
-
-### Working on Your Project
-1. Create a new branch:
-   ```bash
-   git checkout -b exploration
-   ```
-
-2. Make changes and commit:
-   ```bash
-   git add .
-   git commit -m "Description of changes"
-   git push origin exploration
-   ```
-
-### Getting Updates
-When the base repository is improved:
-```bash
-# Get updates
-git fetch upstream
-git checkout main
-git merge upstream/main
-
-# Update your branch
-git checkout exploration
-git merge main
-```
-
-### Troubleshooting
-- Having Git issues? Post on Ed Discussion
-- Can't push/pull? Check if you're using HTTPS or SSH
-- Windows path too long? Enable long paths:
-  ```bash
-  git config --system core.longpaths true
-  ```
-
-## Getting Help
-- Use AI tools (ChatGPT, GitHub Copilot)
-- See course staff for technical issues
-- Document your progress
+**➡️ [PRISM Interactive Demo](https://droov-opt.hf.space/)**
 
 
 
