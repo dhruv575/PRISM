@@ -56,6 +56,9 @@ These dimensions form a multi-objective framework to balance growth, risk contro
 ## 3. Formulation
 
 ### Objective Function
+Given our portfolio returns 
+
+$$R_p = \sum_{i=1}^n w_{i,t}\cdot R_{i,t}$$
 
 Our full optimization problem is:
 
@@ -70,10 +73,10 @@ where:
 ### Constraints
 
 - **Budget constraint:**
-  $$ \sum_{i=1}^N w_{t,i} = 1 $$
+  $$\sum_{i=1}^N w_{t,i} = 1$$
 
 - **Long-only (no short selling):**
-  $$ w_{t,i} \geq 0 \quad \text{for all} \quad i, t $$
+  $$w_{t,i} \geq 0 \quad \text{for all} \quad i, t$$
 
 Additional leverage and short-selling scenarios are being explored as next steps.
 
@@ -82,6 +85,7 @@ Additional leverage and short-selling scenarios are being explored as next steps
 ## 4. Variable Definitions
 
 - **$R_p$:** Portfolio returns.
+- **$n$** Number of assets held in the portfolio.
 - **$w_{i,t}$:** Weight assigned to asset $i$ at time $t$.
 - **$R_{i,t}$:** Return of asset $i$ at time $t$.
 - **$r_{f,t}$:** Risk-free rate at time $t$.
@@ -91,29 +95,27 @@ Additional leverage and short-selling scenarios are being explored as next steps
 ### Metric Formulas
 
 - **Sortino Ratio:**
-  $$
-  Sortino_t(R_p, r_f) = \frac{E[R_p - r_f]}{\sigma_{downside} + \epsilon}
-  $$
+
+  $$Sortino_t(R_p, r_f) = \frac{E[R_p - r_f]}{\sigma_{\text{downside}} + \epsilon}$$
+  - **Downside Variability**:
+  
+  $$\sigma_{\text{downside}} = \sqrt{\frac{1}{T}\sum_{t=1}^{T} \min(R_p - r_{f,t}, \text{NA})^2}$$
 
 - **Maximum Drawdown:**
-  $$
-  MaxDD_t(R_p) = \frac{\max_{T \in [t-m,t]} CR_T - CR_t}{\max_{T \in [t-m,t]} CR_T + \epsilon}
-  $$
+
+  $$MaxDD_t(R_p) = \frac{\max_{T \in [t-m,t]} CR_T - CR_t}{\max_{T \in [t-m,t]} CR_T + \epsilon}$$
 
 - **Turnover:**
-  $$
-  Turnover(w_t, w_{t-1}) = \frac{1}{2} \sum_{i=1}^{N} |w_{i,t} - w_{i,t-1}|
-  $$
+
+  $$Turnover(w_t, w_{t-1}) = \frac{1}{2} \sum_{i=1}^{N} |w_{i,t} - w_{i,t-1}|$$
 
 - **Concentration Penalty (CP):**
-  $$
-  CP(w_t) = \max(ENP_{min} - ENP(w_t), 0) + \max(ENP(w_t) - ENP_{max}, 0)
-  $$
 
-- **Effective Number of Positions (ENP):**
-  $$
-  ENP(w_t) = \frac{1}{\sum_{i=1}^{N} (w_{i,t})^2 + \epsilon}
-  $$
+  $$CP(w_t) = \max(ENP_{min} - ENP(w_t), 0) + \max(ENP(w_t) - ENP_{max}, 0)$$
+
+  - **Effective Number of Positions (ENP):**
+
+    $$ENP(w_t) = \frac{1}{\sum_{i=1}^{N} (w_{i,t})^2 + \epsilon}$$
 
 ---
 
@@ -162,8 +164,7 @@ Solutions included memory-efficient batching, adaptive learning rates, and caref
 ## 7. Demonstration
 
 We hosted a working demo on Hugging Face Spaces to showcase model behavior:
-- **[Demo Link](https://droov-opt.hf.space/)**
-- Allows users to see how portfolios evolved over time.
+- **[Link to Demo](https://droov-opt.hf.space/)**
 
 ---
 
