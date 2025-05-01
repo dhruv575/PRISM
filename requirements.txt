@@ -1,0 +1,9 @@
+torch
+pandas
+matplotlib
+yfinance
+numpy
+seaborn
+tqdm
+statsmodels
+ipython
