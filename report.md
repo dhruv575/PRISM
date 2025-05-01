@@ -27,29 +27,38 @@ The stock market operates under extreme uncertainty, influenced by a complex web
 
 ### Literature Review
 
+This section explains fundamental portfolio management strategies that have been used since the mid-20th century. Specifically, in 1952, Harry Markowitz published a paper on Mean-Variance Optimization that revolutionized investment theory.
+
 - **Mean-Variance Optimization (Markowitz, 1952):**
   - The founding idea of portfolio theory: balance returns vs. variance.
   - Highlights diversification benefits: adding imperfectly correlated assets reduces risk.
   - Leads to the "efficient frontier" of optimal risk-return trade-offs.
 
+Building on Markowitz's work, William Sharpe developed a metric to evaluate portfolio performance:
+  
 - **Sharpe Ratio (Sharpe, 1966):**
   - $$SR = \frac{R_p - r_f}{\sigma_p}$$
   - Measures the risk-adjusted return considering both return and standard deviation.
   - The portfolio maximizing Sharpe is called the "tangency portfolio."
 
+However, in industry, multiple metrics are incorporated for portfolio selection. In 2000, Rockafellar and Uryasev released an important paper that introduced optimization with Conditional Value-at-Risk. This was one of the first successful attempts to combine numerous metrics together.
+
 - **Conditional Value-at-Risk (CVaR):**
   - Focuses on tail risk: the expected loss during the worst $\alpha\%$ of cases.
   - Gained popularity post-2008 crisis for modeling rare but extreme events.
 
-### Modeling Metrics
-We expanded beyond Sharpe to include:
+Combining metrics is what we did in our project as well. To identify the metrics to combine, we performed a comprehensive literature review across three major academic databases using the following queries:
 
-- **Sortino Ratio:** Measures return relative to downside risk (ignores upside volatility).
-- **Maximum Drawdown:** Measures the worst peak-to-trough decline in portfolio value.
-- **Turnover:** Captures portfolio churning and associated costs.
-- **Concentration Penalty:** Controls the spread of weights across assets (diversification).
+- **Web of Science:**
+  ("stock" OR "equity") AND ("portfolio optimization" OR "asset allocation") AND ("risk measures" OR "risk metrics") AND ("drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR liquidity OR skewness OR kurtosis) AND (optimization OR "gradient descent" OR "adam" OR "rmsprop")
 
-These dimensions form a multi-objective framework to balance growth, risk control, and practicality.
+- **Scopus:**
+  TITLE-ABS-KEY("portfolio optimization" OR "asset allocation") AND ("risk measures" OR "risk metrics") AND ("drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR liquidity OR skewness OR kurtosis) AND ("stock" OR "equity")
+
+- **EconLit:**
+  ("portfolio optimization" OR "portfolio selection") AND ("risk measures" OR "risk metrics" OR "alternative risk premia") AND ("drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR "tail risk" OR "drawdown range" OR "short selling") AND ("liquidity" OR "factor-based" OR "multi-factor" OR "factor selection" OR "factor exposure")
+
+This systematic search yielded 177 relevant articles across these databases. After analyzing this corpus of literature, we identified four key metrics that are commonly used in portfolio optimization but are underrepresented in traditional academic models: Sortino ratio, maximum drawdown, concentration penalty, and turnover costs.
 
 ---
 
