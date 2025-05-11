@@ -41,7 +41,7 @@ Building on Markowitz's work, William Sharpe developed a metric to evaluate port
   - Measures the risk-adjusted return considering both return and standard deviation.
   - The portfolio maximizing Sharpe is called the "tangency portfolio."
 
-However, in industry, multiple metrics are incorporated for portfolio selection. In 2000, Rockafellar and Uryasev released an important paper that introduced optimization with Conditional Value-at-Risk. This was one of the first successful attempts to combine numerous metrics together.
+However, in industry, multiple metrics are incorporated for portfolio selection. In 2000, Rockafellar and Uryasev released an important paper that explained how to optimize a stock portfolio with respect to both the sharpe ratio and Conditional Value-at-Risk (CVaR). It demonstrated how multiple metrics can be combined to construct more robust portfolios. 
 
 - **Conditional Value-at-Risk (CVaR):**
   - Focuses on tail risk: the expected loss during the worst $\alpha\%$ of cases.
@@ -58,7 +58,7 @@ Combining metrics is what we did in our project as well. To identify the metrics
 - **EconLit:**
   ("portfolio optimization" OR "portfolio selection") AND ("risk measures" OR "risk metrics" OR "alternative risk premia") AND ("drawdown" OR "value-at-risk" OR "conditional value-at-risk" OR "tail risk" OR "drawdown range" OR "short selling") AND ("liquidity" OR "factor-based" OR "multi-factor" OR "factor selection" OR "factor exposure")
 
-This systematic search yielded 177 relevant articles across these databases. After analyzing this corpus of literature, we identified four key metrics that are commonly used in portfolio optimization but are underrepresented in traditional academic models: Sortino ratio, maximum drawdown, concentration penalty, and turnover costs.
+The search yielded 177 articles. After analyzing the articles, we identified four key metrics that we wanted to use on our optimization approach, specifically: Sortino ratio, maximum drawdown, concentration penalty, and turnover costs, all dsicussed in more detail below.
 
 ---
 
