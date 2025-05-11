@@ -20,28 +20,23 @@
 
 ```
 .
-├── README.md                    # You are here!
-├── final_report.md              # Final project report (detailed).
-├── report.md                    # Potentially an earlier or summary report.
-├── requirements.txt             # Python package dependencies.
-├── notebooks/                   # Jupyter notebooks for experiments, visualization, and demos.
-│   └── demo.ipynb               # (Expected) Runnable demo notebook showcasing key functionalities.
-├── src/                         # Source code for the PRISM optimization library and scripts.
-│   ├── __init__.py
-│   ├── optimizers/              # Core optimization logic (e.g., OGD).
-│   ├── metrics/                 # Calculation of Sortino, MDD, Turnover, ENP, etc.
-│   └── utils/                   # Utility functions (data loading, plotting).
-├── data/                        # Placeholder for data files (not included, specify download instructions).
-├── slides/                      # Presentation slides.
-└── _development_history/        # Archive of previous report drafts, critiques, etc. (Not needed for final run).
+├── README.md                        # You are here!
+├── report.md                        # Final project report.
+├── requirements.txt                 # Python package dependencies.
+├── notebooks/                       # Jupyter notebooks for experiments, visualization, and demos.
+│   └── Final Notebook.ipynb         # Final (most up-to-date) notebook. 
+├── src/                             # Source code for the PRISM optimization library and scripts.
+│   └── OnlinePortfolioOptimizer.py  # Online portfolio optimizer source code
+├── docs/                            # Final presentation slides.
+├── demo_files/                      # Files for perfoming the demo.
+│   └── data/                        # Data used in demo.
+└── _development_history/            # Archive of previous report drafts, critiques, etc. (Not needed for final run).
 ```
-*Note: The exact structure within `src/` and the presence of `demo.ipynb` are inferred; please adjust if needed.*
-
 - **`src/`**: Contains the core Python modules for the optimization logic and metric calculations.
-- **`notebooks/`**: Holds Jupyter notebooks, ideally including a `demo.ipynb`.
-- **`final_report.md` / `report.md`**: The detailed written report(s).
+- **`notebooks/`**: Holds the final (most up-to-date) Jupyter notebook.
+- **`report.md`**: The final written report.
 - **`requirements.txt`**: Required Python packages.
-- **`slides/`**: Project presentation slides.
+- **`docs/`**: Project presentation slides.
 - **`_development_history/`**: Archival folder showing project evolution, not required for execution.
 
 ## Setup Instructions
@@ -53,7 +48,7 @@
     ```
 
 2.  **Python Version:**
-    Ensure you have Python 3.10 or newer installed (as per the original template, confirm if different).
+    Ensure you have Python 3.10 or newer installed.
 
 3.  **Create a Virtual Environment (Recommended):**
     ```bash
